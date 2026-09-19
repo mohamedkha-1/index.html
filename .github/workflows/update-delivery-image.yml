@@ -1,0 +1,50 @@
+name: Update delivery stage image
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/update-delivery-image.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download delivery image
+        run: |
+          mkdir -p assets/review
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/8cac6507-2757-44b6-af41-aac705078257.png" -o assets/review/04-delivery.png
+          test -s assets/review/04-delivery.png
+
+      - name: Replace delivery visual only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+          pattern = r'<div class="review-frame"><img alt="مشروع منفذ" src="[^"]+"/><span class="frame-label">DELIVERED</span></div>'
+          repl = '<div class="review-frame"><img alt="المشروع بعد التسليم" src="assets/review/04-delivery.png"/><span class="frame-label">DELIVERED</span></div>'
+          s, n = re.subn(pattern, repl, s, count=1)
+          if n != 1:
+              raise SystemExit(f"Delivery frame replacement count: {n}")
+          p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Remove one-time workflow
+        run: rm -f .github/workflows/update-delivery-image.yml
+
+      - name: Commit change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/review/04-delivery.png .github/workflows/update-delivery-image.yml
+          git commit -m "Update delivery stage image"
+          git push
