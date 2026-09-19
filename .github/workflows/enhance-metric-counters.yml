@@ -16,64 +16,61 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
-
       - name: Enhance counters
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path("index.html")
           s = p.read_text(encoding="utf-8")
-
-          css_anchor = ".trust-item strong{display:block;font-size:clamp(28px,3vw,46px);line-height:1;color:#fff}"
-          css_add = """.trust-item strong{display:block;font-size:clamp(28px,3vw,46px);line-height:1;color:#fff;font-variant-numeric:tabular-nums}.trust-item [data-count]{display:inline-block;min-width:1.2ch;transition:transform .18s ease,opacity .18s ease}.trust-item.count-live [data-count]{transform:translateY(-2px) scale(1.04)}.trust-item.count-done [data-count]{transform:none}"""
-          if css_anchor in s:
-              s = s.replace(css_anchor, css_add, 1)
+          
+          css_old = ".trust-item strong{display:block;font-size:clamp(28px,3vw,46px);line-height:1;color:#fff}"
+          css_new = ".trust-item strong{display:block;font-size:clamp(28px,3vw,46px);line-height:1;color:#fff;font-variant-numeric:tabular-nums}.trust-item [data-count]{display:inline-block;min-width:1.2ch;transition:transform .18s ease,opacity .18s ease}.trust-item.count-live [data-count]{transform:translateY(-2px) scale(1.04)}.trust-item.count-done [data-count]{transform:none}"
+          if css_old in s:
+              s = s.replace(css_old, css_new, 1)
           elif ".trust-item [data-count]" not in s:
               raise SystemExit("Counter CSS anchor not found")
-
+          
           old = """let counted=false; const strip=$('.trust-strip'); new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&!counted){counted=true;$$('[data-count]').forEach((el,i)=>{const item=el.closest('.trust-item');setTimeout(()=>{item&&item.classList.add('count-live');const target=+el.dataset.count,start=performance.now(),duration=1850;function tick(n){let p=Math.min((n-start)/duration,1),ease=1-Math.pow(1-p,4),v=Math.round(target*ease);el.textContent=el.dataset.comma?v.toLocaleString('en-US'):v;if(p<1){requestAnimationFrame(tick)}else if(item){item.classList.remove('count-live');item.classList.add('count-done')}}requestAnimationFrame(tick)},i*120)})}}),{threshold:.22}).observe(strip);"""
-
+          
           new = """const strip=$('.trust-strip'),counterEls=$$('[data-count]');let counterRunning=false,counterSeen=false;
-    function setCounterValue(el,v){el.textContent=el.dataset.comma?v.toLocaleString('en-US'):String(v)}
-    function runCounters(){
-      if(counterRunning)return;
-      counterRunning=true;
-      counterEls.forEach(el=>{setCounterValue(el,0);const item=el.closest('.trust-item');item&&item.classList.remove('count-done','count-live')});
-      if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-        counterEls.forEach(el=>setCounterValue(el,+el.dataset.count));counterRunning=false;counterSeen=true;return;
-      }
-      counterEls.forEach((el,i)=>{
-        const item=el.closest('.trust-item'),target=+el.dataset.count,delay=i*110,duration=target<=2?1250:(target<20?1750:(target<200?2050:2400));
-        setTimeout(()=>{
-          item&&item.classList.add('count-live');
-          const start=performance.now();
-          function tick(now){
-            const p=Math.min((now-start)/duration,1),ease=1-Math.pow(1-p,3);
-            let value=Math.floor(target*ease);
-            if(p===1)value=target;
-            setCounterValue(el,value);
-            if(p<1){requestAnimationFrame(tick)}
-            else{item&&item.classList.remove('count-live');item&&item.classList.add('count-done');if(i===counterEls.length-1){counterRunning=false;counterSeen=true}}
+          function setCounterValue(el,v){el.textContent=el.dataset.comma?v.toLocaleString('en-US'):String(v)}
+          function runCounters(){
+            if(counterRunning)return;
+            counterRunning=true;
+            counterEls.forEach(el=>{setCounterValue(el,0);const item=el.closest('.trust-item');item&&item.classList.remove('count-done','count-live')});
+            if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+              counterEls.forEach(el=>setCounterValue(el,+el.dataset.count));counterRunning=false;counterSeen=true;return;
+            }
+            counterEls.forEach((el,i)=>{
+              const item=el.closest('.trust-item'),target=+el.dataset.count,delay=i*110,duration=target<=2?1250:(target<20?1750:(target<200?2050:2400));
+              setTimeout(()=>{
+                item&&item.classList.add('count-live');
+                const start=performance.now();
+                function tick(now){
+                  const p=Math.min((now-start)/duration,1),ease=1-Math.pow(1-p,3);
+                  let value=Math.floor(target*ease);
+                  if(p===1)value=target;
+                  setCounterValue(el,value);
+                  if(p<1){requestAnimationFrame(tick)}
+                  else{item&&item.classList.remove('count-live');item&&item.classList.add('count-done');if(i===counterEls.length-1){counterRunning=false;counterSeen=true}}
+                }
+                requestAnimationFrame(tick);
+              },delay);
+            });
           }
-          requestAnimationFrame(tick);
-        },delay);
-      });
-    }
-    const counterObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
-      if(entry.isIntersecting&&entry.intersectionRatio>=.45){runCounters()}
-      if(!entry.isIntersecting&&counterSeen&&!counterRunning){counterSeen=false;counterEls.forEach(el=>setCounterValue(el,0))}
-    }),{threshold:[0,.45,.7]});
-    if(strip)counterObserver.observe(strip);"""
-
+          const counterObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+            if(entry.isIntersecting&&entry.intersectionRatio>=.45){runCounters()}
+            if(!entry.isIntersecting&&counterSeen&&!counterRunning){counterSeen=false;counterEls.forEach(el=>setCounterValue(el,0))}
+          }),{threshold:[0,.45,.7]});
+          if(strip)counterObserver.observe(strip);"""
+          
           if old not in s:
               raise SystemExit("Existing counter script not found")
           s = s.replace(old, new, 1)
           p.write_text(s, encoding="utf-8")
           PY
-
       - name: Remove one-time workflow
         run: rm -f .github/workflows/enhance-metric-counters.yml
-
       - name: Commit change
         run: |
           git config user.name "github-actions[bot]"
