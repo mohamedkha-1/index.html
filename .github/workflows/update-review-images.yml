@@ -1,0 +1,83 @@
+name: Update review stage images
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/update-review-images.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download supplied stage images
+        run: |
+          mkdir -p assets/review
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/34081ef3-e1c3-4983-8e16-ad0c8867ae43.png" -o assets/review/01-plan.png
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/4cd59f51-3455-4dff-8027-c67dd1018e53.png" -o assets/review/02-concept.png
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/50731437-370d-4813-b616-dc535117c69e.png" -o assets/review/03-onsite.png
+          test -s assets/review/01-plan.png
+          test -s assets/review/02-concept.png
+          test -s assets/review/03-onsite.png
+
+      - name: Replace review stage visuals
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+
+          # Keep the plan readable in full rather than cropping it like a photo.
+          css = ".review-frame img.review-plan{object-fit:contain;background:#fff}"
+          if css not in s:
+              anchor = ".review-frame img{height:100%;object-fit:cover}"
+              if anchor not in s:
+                  raise SystemExit("Review image CSS anchor not found")
+              s = s.replace(anchor, anchor + css, 1)
+
+          old_plan = '<div class="review-frame active"><div class="blueprint"></div><span class="frame-label">TECHNICAL PLAN</span></div>'
+          new_plan = '<div class="review-frame active"><img class="review-plan" alt="المخطط الفني للمشروع" src="assets/review/01-plan.png"/><span class="frame-label">TECHNICAL PLAN</span></div>'
+          if old_plan not in s:
+              raise SystemExit("Plan review frame not found")
+          s = s.replace(old_plan, new_plan, 1)
+
+          s, n1 = re.subn(
+              r'<div class="review-frame"><img alt="تصور ثلاثي الأبعاد" src="data:image/[^"]+"/><span class="frame-label">3D / DESIGN REVIEW</span></div>',
+              '<div class="review-frame"><img alt="التصور ثلاثي الأبعاد للمشروع" src="assets/review/02-concept.png"/><span class="frame-label">3D / DESIGN REVIEW</span></div>',
+              s,
+              count=1
+          )
+          if n1 != 1:
+              raise SystemExit(f"Concept frame replacement count: {n1}")
+
+          s, n2 = re.subn(
+              r'<div class="review-frame"><img alt="موقع تنفيذ" src="data:image/[^"]+"/><span class="frame-label">ON SITE</span></div>',
+              '<div class="review-frame"><img alt="المشروع أثناء التنفيذ في الموقع" src="assets/review/03-onsite.png"/><span class="frame-label">ON SITE</span></div>',
+              s,
+              count=1
+          )
+          if n2 != 1:
+              raise SystemExit(f"On-site frame replacement count: {n2}")
+
+          p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Remove one-time workflow
+        run: rm -f .github/workflows/update-review-images.yml
+
+      - name: Commit images and page update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/review .github/workflows/update-review-images.yml
+          git commit -m "Use supplied images in project review stages"
+          git push
