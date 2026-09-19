@@ -1,0 +1,63 @@
+name: Improve heading semantics
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/improve-heading-semantics.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Fix semantic heading hierarchy
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+
+          s = s.replace(
+              ".clients-head h3{font-size:31px;margin:8px 0 0}",
+              ".clients-head h2{font-size:31px;margin:8px 0 0}",
+              1
+          )
+          s = s.replace(
+              "<h3>شركاء نفخر بالعمل معهم.</h3>",
+              "<h2>شركاء نفخر بالعمل معهم.</h2>",
+              1
+          )
+
+          s = s.replace(
+              ".faq-q b{font-size:17px}",
+              ".faq-q h3{font-size:17px;margin:0;font-weight:700;line-height:1.6}",
+              1
+          )
+
+          pattern = r'(<button class="faq-q">)<b>(.*?)</b>(<span>\+</span></button>)'
+          s, count = re.subn(pattern, r'\1<h3>\2</h3>\3', s)
+          if count != 6:
+              raise SystemExit(f"Expected 6 FAQ questions, updated {count}")
+
+          p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Remove one-time workflow
+        run: rm -f .github/workflows/improve-heading-semantics.yml
+
+      - name: Commit semantic heading update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/improve-heading-semantics.yml
+          git commit -m "Improve semantic heading hierarchy"
+          git push
