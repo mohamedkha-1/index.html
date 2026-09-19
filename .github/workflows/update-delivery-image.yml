@@ -30,8 +30,8 @@ jobs:
           import re
           p = Path("index.html")
           s = p.read_text(encoding="utf-8")
-          pattern = r'<div class="review-frame"><img alt="مشروع منفذ" src="[^"]+"/><span class="frame-label">DELIVERED</span></div>'
-          repl = '<div class="review-frame"><img alt="المشروع بعد التسليم" src="assets/review/04-delivery.png"/><span class="frame-label">DELIVERED</span></div>'
+          pattern = r'<div class="review-frame"><img alt="مشروع منفذ" src="[^"]+"/><span class="frame-label">FINAL SPACE</span></div>'
+          repl = '<div class="review-frame"><img alt="المشروع بعد التسليم" src="assets/review/04-delivery.png"/><span class="frame-label">FINAL SPACE</span></div>'
           s, n = re.subn(pattern, repl, s, count=1)
           if n != 1:
               raise SystemExit(f"Delivery frame replacement count: {n}")
