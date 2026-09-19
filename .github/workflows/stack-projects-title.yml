@@ -1,0 +1,45 @@
+name: Stack projects heading content
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/stack-projects-title.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  edit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Stack Selected Projects heading content
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+          marker = ".projects .section-title{display:flex;flex-direction:column;align-items:flex-start;gap:18px}"
+          if marker not in s:
+              needle = ".section-title p{max-width:650px;color:var(--muted);font-size:17px;line-height:1.9;margin:0}"
+              replacement = needle + marker + ".projects .section-title>div{width:100%}.projects .section-title p{max-width:820px;width:100%;margin:0}"
+              if needle not in s:
+                  raise SystemExit("Target CSS rule not found")
+              s = s.replace(needle, replacement, 1)
+              p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Remove one-time workflow
+        run: rm -f .github/workflows/stack-projects-title.yml
+
+      - name: Commit change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/stack-projects-title.yml
+          git commit -m "Stack projects heading content"
+          git push
