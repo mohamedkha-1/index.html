@@ -39,3 +39,4 @@ jobs:
         uses: actions/deploy-pages@v4
 
 # publish official Bunyah brand identity
+# publish hero title fix
