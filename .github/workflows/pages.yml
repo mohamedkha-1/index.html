@@ -38,4 +38,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-# publish Tend gallery and refined copy
+# publish San Marzano gallery and refined copy
