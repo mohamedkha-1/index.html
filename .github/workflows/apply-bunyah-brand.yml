@@ -1,0 +1,132 @@
+name: Apply official Bunyah brand identity
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/apply-bunyah-brand.yml"
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Apply brand identity only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          
+          # 1) Official palette variables only
+          root_old="""--bg:#151113;--bg2:#1D171A;--surface:#211A1D;--surface2:#2A2024;
+                --wine:#6E1636;--wine2:#8B2850;--wine3:#B6607C;--cream:#F4ECE4;--sand:#D7C3B4;
+                --ink:#171314;--paper:#FBF8F4;--muted:#9E9195;--line:rgba(255,255,255,.10);--darkline:rgba(23,19,20,.12);
+                --green:#8F9A72;"""
+          root_new="""--bg:#141414;--bg2:#141414;--surface:#1A1A1A;--surface2:#242424;
+                --wine:#4C0B25;--wine2:#703B51;--wine3:#C1B8AD;--cream:#E5E4E3;--sand:#C1B8AD;
+                --ink:#141414;--paper:#E5E4E3;--muted:#8E8273;--line:rgba(229,228,227,.12);--darkline:rgba(20,20,20,.14);
+                --green:#C1B8AD;"""
+          if root_old not in s:
+              raise SystemExit("Expected theme variables not found")
+          s=s.replace(root_old, root_new, 1)
+          
+          # 2) Theme-color metadata
+          s=s.replace('meta content="#17080D" name="theme-color"', 'meta content="#141414" name="theme-color"', 1)
+          
+          # 3) Replace only the current synthetic brand mark with the official logo
+          logo_url="https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/73e15d29-90a6-4eae-af05-046c29e30023.png"
+          old_brand='<div class="brand"><span class="brandmark"></span><span>بُنية</span></div>'
+          new_brand=f'<div class="brand"><img class="brand-logo" src="{logo_url}" alt="بُنية"/></div>'
+          count=s.count(old_brand)
+          if count < 2:
+              raise SystemExit(f"Expected nav/footer brand blocks, found {count}")
+          s=s.replace(old_brand,new_brand)
+          
+          # 4) Brand-only visual overrides. No layout/content changes.
+          brand_css="""
+          <style id="bunyah-brand-identity-v1">
+          :root{
+            --bg:#141414;--bg2:#141414;--surface:#1A1A1A;--surface2:#242424;
+            --wine:#4C0B25;--wine2:#703B51;--wine3:#C1B8AD;
+            --cream:#E5E4E3;--sand:#C1B8AD;--ink:#141414;--paper:#E5E4E3;--muted:#8E8273;
+          }
+          .brand{display:flex;align-items:center;gap:0}
+          .brand-logo{display:block;width:116px;height:auto;object-fit:contain}
+          footer .brand-logo{width:108px}
+          .nav.sc{background:rgba(20,20,20,.92);border-bottom-color:rgba(229,228,227,.12)}
+          .links{color:#C1B8AD}
+          .links a:hover{color:#E5E4E3}
+          .ey{color:#8E8273}
+          .ey.light{color:#C1B8AD}
+          .btn.primary{
+            background:#4C0B25;
+            color:#E5E4E3;
+            box-shadow:0 13px 34px rgba(76,11,37,.24)
+          }
+          .btn.primary:hover{background:#5A1730}
+          .btn.ghost{border-color:rgba(229,228,227,.24);color:#E5E4E3}
+          .btn.light{background:#E5E4E3;color:#4C0B25}
+          .hero{
+            background:
+              radial-gradient(circle at 18% 18%,rgba(76,11,37,.26),transparent 31%),
+              linear-gradient(135deg,#141414 0%,#141414 58%,#1A1517 100%)
+          }
+          .hero-copy h1,
+          .section-title h2,
+          .service-card h3,
+          .project-body h3,
+          .faq-q h3,
+          .contact-copy h2,
+          .visual-label strong{
+            font-family:"HT Baybars Display",Cairo,Arial,sans-serif;
+          }
+          .hero-copy h1 span{color:#C1B8AD}
+          .services{background:#141414}
+          .service-card{background:linear-gradient(180deg,#1A1A1A,#141414)}
+          .service-num{color:#C1B8AD}
+          .visual-journey{background:#141414}
+          .visual-journey .section-title p{color:#C1B8AD}
+          .visual-step{color:#C1B8AD;border-color:rgba(229,228,227,.22);background:rgba(20,20,20,.34)}
+          .trust-strip{background:#141414}
+          .dots span.active{background:#C1B8AD}
+          .fab{background:#E5E4E3!important;color:#4C0B25!important}
+          .hero:after{
+            content:"";
+            position:absolute;
+            width:92px;height:54px;
+            left:clamp(22px,4vw,70px);
+            bottom:clamp(28px,5vw,72px);
+            opacity:.16;
+            pointer-events:none;
+            background:
+              linear-gradient(45deg,transparent 34%,#C1B8AD 35% 65%,transparent 66%) 0 24px/28px 28px no-repeat,
+              linear-gradient(45deg,transparent 34%,#C1B8AD 35% 65%,transparent 66%) 26px 24px/28px 28px no-repeat,
+              linear-gradient(45deg,transparent 34%,#4C0B25 35% 65%,transparent 66%) 52px 0/28px 28px no-repeat;
+          }
+          @media(max-width:700px){
+            .brand-logo{width:96px}
+            footer .brand-logo{width:96px}
+            .hero:after{width:72px;height:42px;opacity:.12}
+          }
+          </style>
+          """
+          if 'id="bunyah-brand-identity-v1"' not in s:
+              if "</head>" not in s:
+                  raise SystemExit("head end not found")
+              s=s.replace("</head>",brand_css+"</head>",1)
+          
+          p.write_text(s,encoding="utf-8")
+          PY
+      - name: Remove one-time workflow
+        run: rm -f .github/workflows/apply-bunyah-brand.yml
+      - name: Commit brand update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/apply-bunyah-brand.yml
+          git commit -m "Apply official Bunyah brand identity"
+          git push
