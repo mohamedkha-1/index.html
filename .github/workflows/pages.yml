@@ -38,4 +38,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-# publish centered Dhafa journey content
+# publish official Bunyah brand identity
