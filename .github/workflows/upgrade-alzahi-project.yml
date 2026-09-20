@@ -1,0 +1,97 @@
+name: Upgrade Alzahi project card
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/upgrade-alzahi-project.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download Alzahi project images
+        run: |
+          mkdir -p assets/projects/alzahi
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/f988cf69-157b-4b6f-a2d9-a05f96363ed2.jpg" -o assets/projects/alzahi/01-during.jpg
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/6bfe8904-b14b-4d43-bed8-29a4e99005a8.jpg" -o assets/projects/alzahi/02-during.jpg
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/eb643411-5d12-4f4c-b12e-06b35ac7577e.jpg" -o assets/projects/alzahi/03-during.jpg
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/59fefe0d-f8ae-4dc1-b289-76e2ef9e9728.jpg" -o assets/projects/alzahi/04-after.jpg
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/2b8cdf16-cf2d-44e5-abf9-f0603c935a6f.jpg" -o assets/projects/alzahi/05-after.jpg
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/d76a071e-744e-4549-83ed-dc1a3fcf3c74.jpg" -o assets/projects/alzahi/06-after.jpg
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/94cc2753-2c3b-43ed-9323-c1a612129548.jpg" -o assets/projects/alzahi/07-after.jpg
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/bb6384d0-e942-465c-93cf-d4a4269c10dc.jpg" -o assets/projects/alzahi/08-after.jpg
+          for f in assets/projects/alzahi/*.jpg; do test -s "$f"; done
+
+      - name: Upgrade Alzahi card
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+
+          css_anchor = ".project-card:hover .project-image img{transform:scale(1.04)}"
+          css_add = """.project-card:hover .project-image img{transform:scale(1.04)}.alzahi-gallery{position:relative}.alzahi-gallery .alzahi-slide{position:absolute;inset:0;width:100%;height:100%;opacity:0;transform:scale(1.015);transition:opacity .75s ease,transform 1.2s var(--ease);object-fit:cover}.alzahi-gallery .alzahi-slide.active{opacity:1;transform:scale(1);z-index:1}.project-card:hover .alzahi-gallery .alzahi-slide.active{transform:scale(1.035)}.alzahi-dots{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:4;display:flex;gap:7px;padding:8px 10px;border-radius:999px;background:rgba(18,13,15,.46);backdrop-filter:blur(10px)}.alzahi-dots button{width:7px;height:7px;border:0;border-radius:50%;background:rgba(255,255,255,.5);padding:0;cursor:pointer;transition:.25s}.alzahi-dots button.active{width:22px;border-radius:999px;background:#fff}.alzahi-gallery .project-badge{z-index:5}.alzahi-gallery .gallery-state{position:absolute;left:18px;top:18px;z-index:5;background:rgba(255,255,255,.88);color:#35101F;border:1px solid rgba(53,16,31,.08);border-radius:999px;padding:7px 10px;font-size:10px;font-weight:800;backdrop-filter:blur(10px)}"""
+          if css_anchor not in s:
+              raise SystemExit("Project image CSS anchor not found")
+          s = s.replace(css_anchor, css_add, 1)
+
+          articles = list(re.finditer(r'<article class="project-card reveal">.*?</article>', s, flags=re.S))
+          target = None
+          for m in articles:
+              if "فيلا الزاهي" in m.group(0):
+                  target = m
+                  break
+          if not target:
+              raise SystemExit("Alzahi project card not found")
+
+          gallery = """<div class="project-image alzahi-gallery" data-alzahi-gallery>
+<img class="alzahi-slide active" alt="فيلا الزاهي أثناء أعمال إعادة التأهيل" src="assets/projects/alzahi/01-during.jpg" loading="lazy"/>
+<img class="alzahi-slide" alt="فيلا الزاهي أثناء أعمال الترميم" src="assets/projects/alzahi/02-during.jpg" loading="lazy"/>
+<img class="alzahi-slide" alt="فيلا الزاهي أثناء مرحلة التنفيذ" src="assets/projects/alzahi/03-during.jpg" loading="lazy"/>
+<img class="alzahi-slide" alt="فيلا الزاهي بعد اكتمال إعادة التأهيل" src="assets/projects/alzahi/04-after.jpg" loading="lazy"/>
+<img class="alzahi-slide" alt="تفاصيل مشروع فيلا الزاهي بعد التسليم" src="assets/projects/alzahi/05-after.jpg" loading="lazy"/>
+<img class="alzahi-slide" alt="الواجهة النهائية لمشروع فيلا الزاهي" src="assets/projects/alzahi/06-after.jpg" loading="lazy"/>
+<img class="alzahi-slide" alt="تفاصيل الواجهة النهائية لفيلا الزاهي" src="assets/projects/alzahi/07-after.jpg" loading="lazy"/>
+<img class="alzahi-slide" alt="المساحات الداخلية لمشروع فيلا الزاهي بعد التسليم" src="assets/projects/alzahi/08-after.jpg" loading="lazy"/>
+<span class="project-badge">ترميم كامل</span>
+<span class="gallery-state" data-gallery-state>أثناء التنفيذ</span>
+<div class="alzahi-dots" aria-label="صور مشروع فيلا الزاهي">
+<button class="active" type="button" aria-label="الصورة 1"></button><button type="button" aria-label="الصورة 2"></button><button type="button" aria-label="الصورة 3"></button><button type="button" aria-label="الصورة 4"></button><button type="button" aria-label="الصورة 5"></button><button type="button" aria-label="الصورة 6"></button><button type="button" aria-label="الصورة 7"></button><button type="button" aria-label="الصورة 8"></button>
+</div></div>"""
+
+          desc = """<p class="project-desc" style="margin:14px 0 0;color:#786C70;font-size:12px;line-height:1.95">إعادة تأهيل متكامل لفيلا قائمة بمساحة 850م²، حوّلنا فيها مبنى قائمًا إلى مساحة جاهزة للاستخدام من خلال إدارة نطاق متعدد التخصصات ضمن جهة تنفيذ واحدة. بدأ العمل من التكسير والترحيل ومعالجة الموقع، مرورًا بالكهرباء والميكانيكا والسباكة والتكييف، وصولًا إلى الدهانات والأرضيات والأسقف والنجارة والفرش. القيمة لم تكن في تنفيذ البنود منفصلة، بل في تنسيقها وتسلسلها وإغلاق التفاصيل حتى تسليم مشروع متكامل بجودة واضحة.</p>"""
+
+          new_article = f"""<article class="project-card reveal">{gallery}<div class="project-body"><div class="project-head"><h3>فيلا الزاهي</h3><span class="project-area">850 م²</span></div>{desc}<div class="scope"><span>ترميم متكامل</span><span>MEP</span><span>تشطيبات</span><span>نجارة</span><span>فرش</span></div><div class="project-link">من الموقع القائم إلى التسليم<i>←</i></div></div></article>"""
+
+          s = s[:target.start()] + new_article + s[target.end():]
+
+          js = """
+    (()=>{const gallery=document.querySelector('[data-alzahi-gallery]');if(!gallery)return;const slides=[...gallery.querySelectorAll('.alzahi-slide')],dots=[...gallery.querySelectorAll('.alzahi-dots button')],state=gallery.querySelector('[data-gallery-state]');let i=0,timer=null,visible=false;const labels=['أثناء التنفيذ','أثناء التنفيذ','أثناء التنفيذ','بعد التسليم','بعد التسليم','بعد التسليم','بعد التسليم','بعد التسليم'];function show(n){i=(n+slides.length)%slides.length;slides.forEach((el,k)=>el.classList.toggle('active',k===i));dots.forEach((el,k)=>el.classList.toggle('active',k===i));if(state)state.textContent=labels[i]}function stop(){if(timer){clearInterval(timer);timer=null}}function play(){stop();if(!visible||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;timer=setInterval(()=>show(i+1),3600)}dots.forEach((d,k)=>d.addEventListener('click',()=>{show(k);play()}));gallery.addEventListener('mouseenter',stop);gallery.addEventListener('mouseleave',play);gallery.addEventListener('focusin',stop);gallery.addEventListener('focusout',play);new IntersectionObserver(es=>es.forEach(e=>{visible=e.isIntersecting&&e.intersectionRatio>.25;visible?play():stop()}),{threshold:[0,.25,.6]}).observe(gallery);show(0)})();
+"""
+          if "</script>" not in s:
+              raise SystemExit("Closing script tag not found")
+          s = s.replace("</script>", js + "</script>", 1)
+
+          p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Remove one-time workflow
+        run: rm -f .github/workflows/upgrade-alzahi-project.yml
+
+      - name: Commit Alzahi upgrade
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/projects/alzahi .github/workflows/upgrade-alzahi-project.yml
+          git commit -m "Upgrade Alzahi project story and gallery"
+          git push
