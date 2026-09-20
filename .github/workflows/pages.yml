@@ -38,4 +38,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-# publish semantic heading hierarchy
+# publish Alzahi gallery and refined copy
