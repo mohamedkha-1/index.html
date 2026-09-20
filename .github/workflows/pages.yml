@@ -38,4 +38,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-# publish Alzahi gallery and refined copy
+# publish Markab gallery and refined copy
