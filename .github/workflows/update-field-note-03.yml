@@ -1,6 +1,9 @@
 name: Update FIELD NOTE 03 image
 on:
-  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/update-field-note-03.yml"
 permissions:
   contents: write
 jobs:
