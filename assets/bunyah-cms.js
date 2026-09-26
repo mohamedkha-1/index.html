@@ -149,3 +149,13 @@ function wireForm(){
   form.addEventListener("submit",submitForm,true);
 }
 loadCMS();wireForm();
+let cmsRefreshTimer=null;
+function queueCMSRefresh(){
+  clearTimeout(cmsRefreshTimer);
+  cmsRefreshTimer=setTimeout(()=>loadCMS(),250);
+}
+sb.channel("bunyah-cms-live")
+  .on("postgres_changes",{event:"*",schema:"public",table:"cms_content"},queueCMSRefresh)
+  .on("postgres_changes",{event:"*",schema:"public",table:"cms_settings"},queueCMSRefresh)
+  .subscribe();
+setInterval(()=>{if(document.visibilityState==="visible")loadCMS()},30000);
