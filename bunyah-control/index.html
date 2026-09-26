@@ -110,7 +110,8 @@
           <div class="field"><label>الاسم</label><input id="inviteName"></div>
           <div class="field"><label>البريد</label><input id="inviteEmail" type="email"></div>
           <div class="field"><label>الصلاحية</label><select id="inviteRole"><option value="manager">مدير</option><option value="technical">تقني</option><option value="marketing">تسويق</option></select></div>
-          <div class="field" style="align-self:end"><button id="inviteBtn" class="btn primary">إرسال دعوة</button></div>
+          <div class="field"><label>كلمة مرور مؤقتة</label><input id="invitePassword" type="password" minlength="10" placeholder="10 أحرف على الأقل"><small>يسجل المستخدم بها أول مرة ثم يغيّرها من داخل اللوحة.</small></div>
+          <div class="full"><button id="inviteBtn" class="btn primary">إنشاء الحساب</button></div>
         </div>
         <div class="section-head"><div><h2>المستخدمون</h2></div></div>
         <div class="table-wrap"><table class="table"><thead><tr><th>البريد</th><th>الاسم</th><th>الصلاحية</th><th>الحالة</th><th>تاريخ الإنشاء</th><th></th></tr></thead><tbody id="usersBody"></tbody></table></div>
@@ -327,8 +328,8 @@ async function loadUsers(){
   $$("[data-user-toggle]").forEach(b=>b.onclick=()=>userAction({action:b.dataset.active==="true"?"disable":"enable",user_id:b.dataset.userToggle}));
   $$("[data-user-delete]").forEach(b=>b.onclick=()=>{if(confirm("حذف هذا المستخدم نهائيًا؟"))userAction({action:"delete",user_id:b.dataset.userDelete})});
 }
-$("#inviteBtn").onclick=async()=>{const email=$("#inviteEmail").value.trim(),full_name=$("#inviteName").value.trim(),role=$("#inviteRole").value;if(!email){toast("أدخل البريد");return}await userAction({action:"invite",email,full_name,role});$("#inviteEmail").value="";$("#inviteName").value=""};
-async function userAction(body){const {data,error}=await sb.functions.invoke("admin-users",{body});if(error||data?.error){toast(data?.error||error.message);return}toast(body.action==="invite"?"تم إرسال الدعوة":"تم تنفيذ الإجراء");loadUsers()}
+$("#inviteBtn").onclick=async()=>{const email=$("#inviteEmail").value.trim(),full_name=$("#inviteName").value.trim(),role=$("#inviteRole").value,password=$("#invitePassword").value;if(!email){toast("أدخل البريد");return}if(password.length<10){toast("كلمة المرور المؤقتة يجب أن تكون 10 أحرف على الأقل");return}await userAction({action:"create",email,full_name,role,password});$("#inviteEmail").value="";$("#inviteName").value="";$("#invitePassword").value=""};
+async function userAction(body){const {data,error}=await sb.functions.invoke("admin-users",{body});if(error||data?.error){toast(data?.error||error.message);return}toast(body.action==="create"?"تم إنشاء الحساب":"تم تنفيذ الإجراء");loadUsers()}
 
 async function loadAudit(){
   const {data,error}=await sb.from("audit_logs").select("*").order("created_at",{ascending:false}).limit(120);if(error){toast(error.message);return}
