@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>بُنية — لوحة الإدارة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0c0e;--panel:#171214;--panel2:#1e171a;--line:rgba(255,255,255,.09);--text:#f5f2f3;--muted:#a89ba0;--wine:#4c0b25;--wine2:#6d1537;--sand:#c1b8ad;--ok:#2e9b68;--warn:#c88a32;--bad:#bc4a56}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Cairo,Arial,sans-serif;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}.hidden{display:none!important}
+.shell{min-height:100vh;display:grid;grid-template-columns:260px 1fr}.side{border-left:1px solid var(--line);background:#100d0f;padding:22px 16px;position:sticky;top:0;height:100vh}.brand{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 22px;border-bottom:1px solid var(--line)}.brand b{font-size:24px}.role{font-size:10px;color:var(--sand);border:1px solid var(--line);border-radius:999px;padding:5px 8px}.nav{display:grid;gap:6px;margin-top:18px}.nav button{border:0;background:transparent;color:#c9bec2;text-align:right;padding:12px 13px;border-radius:12px;display:flex;align-items:center;gap:10px}.nav button:hover,.nav button.active{background:#21191c;color:#fff}.nav i{width:8px;height:8px;border:1px solid var(--sand);transform:rotate(45deg)}.side-foot{position:absolute;bottom:18px;right:16px;left:16px;border-top:1px solid var(--line);padding-top:14px}.side-foot small{display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.side-foot button{margin-top:10px;width:100%;background:transparent;border:1px solid var(--line);color:#ddd;padding:9px;border-radius:10px}
+.main{min-width:0}.top{min-height:82px;padding:18px 28px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:rgba(15,12,14,.92);backdrop-filter:blur(14px);z-index:10}.top h1{font-size:21px;margin:0 0 4px}.top p{margin:0;color:var(--muted);font-size:11px}.top-actions{display:flex;gap:8px}.btn{border:1px solid var(--line);background:#1d1719;color:#fff;border-radius:11px;padding:10px 14px;font-weight:700}.btn.primary{background:var(--wine);border-color:var(--wine)}.btn.danger{color:#ffc7cd;border-color:rgba(188,74,86,.35)}.content{padding:28px}.view{display:none}.view.active{display:block}.grid{display:grid;gap:14px}.metrics{grid-template-columns:repeat(6,minmax(0,1fr))}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}.metric b{font-size:34px;line-height:1;display:block}.metric span{font-size:11px;color:var(--muted);display:block;margin-top:10px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:28px 0 12px}.section-head h2{font-size:18px;margin:0}.section-head p{font-size:11px;color:var(--muted);margin:4px 0 0}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px}.table{width:100%;border-collapse:collapse;min-width:850px;background:var(--panel)}.table th,.table td{padding:12px 13px;border-bottom:1px solid var(--line);text-align:right;font-size:12px;vertical-align:middle}.table th{color:#c5b9bd;font-weight:700;background:#151113;position:sticky;top:0}.table tr:last-child td{border-bottom:0}.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-size:10px;color:#d7cdd0}.pill.new{border-color:rgba(200,138,50,.35);color:#ffd9a2}.pill.won{border-color:rgba(46,155,104,.4);color:#bdf0d5}.pill.closed,.pill.not_qualified{border-color:rgba(188,74,86,.35);color:#ffc7cd}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.control{background:#131012;border:1px solid var(--line);color:#fff;border-radius:10px;padding:10px 11px;outline:none}.filters .control{min-width:150px}.field{display:grid;gap:6px}.field label{font-size:11px;color:#cabec2}.field small{font-size:10px;color:var(--muted)}.field input,.field select,.field textarea{width:100%;background:#100d0f;border:1px solid var(--line);color:#fff;border-radius:10px;padding:11px;outline:none}.field textarea{min-height:120px;resize:vertical}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.form-grid .full{grid-column:1/-1}.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.setting{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}.setting-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:9px}.setting-head b{font-size:12px}.setting-head small{color:var(--muted);font-size:9px}.setting-actions{display:flex;gap:8px;margin-top:9px;justify-content:flex-end}.content-list{display:grid;gap:10px}.content-row{display:grid;grid-template-columns:180px 1fr 92px;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}.content-row .meta b{font-size:12px;display:block}.content-row .meta small{font-size:9px;color:var(--muted)}.content-row input,.content-row textarea{background:#100d0f;border:1px solid var(--line);color:#fff;border-radius:10px;padding:10px;width:100%}.content-row textarea{min-height:75px}.media-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.media{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}.media img{width:100%;aspect-ratio:1.5;object-fit:cover;background:#0b090a}.media-body{padding:10px}.media-body b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.media-actions{display:flex;gap:6px;margin-top:8px}.media-actions button{flex:1;font-size:10px;padding:7px}.chart{display:flex;align-items:flex-end;gap:7px;height:180px;padding:20px 8px 0}.bar{flex:1;min-width:10px;background:linear-gradient(180deg,#773451,#4c0b25);border-radius:6px 6px 2px 2px;position:relative}.bar span{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--muted);white-space:nowrap}.status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.status-box{background:#120f11;border:1px solid var(--line);padding:13px;border-radius:12px}.status-box b{font-size:22px}.status-box span{display:block;font-size:10px;color:var(--muted);margin-top:4px}.empty{padding:34px;text-align:center;color:var(--muted);font-size:12px}
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 20% 20%,rgba(76,11,37,.28),transparent 32%),#0f0c0e}.login-card{width:min(460px,100%);background:#151113;border:1px solid var(--line);border-radius:24px;padding:28px}.login-card h1{font-size:30px;margin:0 0 4px}.login-card>p{margin:0 0 22px;color:var(--muted);font-size:12px}.tabs{display:flex;gap:7px;margin-bottom:16px}.tabs button{flex:1;background:#100d0f;border:1px solid var(--line);color:#c8bdc0;padding:9px;border-radius:10px}.tabs button.active{background:var(--wine);color:#fff;border-color:var(--wine)}.login-form{display:grid;gap:11px}.login-msg{font-size:11px;min-height:18px;color:#ffc9cf}.notice{padding:11px 12px;border-radius:11px;background:rgba(76,11,37,.18);border:1px solid rgba(193,184,173,.14);font-size:10px;color:#d8ccd0}.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:center;justify-content:center;padding:22px;z-index:30}.modal.open{display:flex}.modal-card{width:min(760px,100%);max-height:90vh;overflow:auto;background:#151113;border:1px solid var(--line);border-radius:20px;padding:20px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.modal-head h3{margin:0;font-size:17px}.close{background:transparent;border:0;color:#fff;font-size:22px}.toast{position:fixed;left:22px;bottom:22px;background:#191416;border:1px solid var(--line);padding:11px 14px;border-radius:12px;z-index:50;font-size:11px;display:none}.toast.show{display:block}.muted{color:var(--muted)}.danger-text{color:#ffadb8}.ok-text{color:#9be0bb}
+@media(max-width:1180px){.metrics{grid-template-columns:repeat(3,1fr)}.media-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:900px){.shell{grid-template-columns:1fr}.side{height:auto;position:static;border-left:0;border-bottom:1px solid var(--line)}.nav{grid-template-columns:repeat(4,1fr)}.side-foot{position:static;margin-top:12px}.top{position:static}.settings-grid,.form-grid{grid-template-columns:1fr}.content-row{grid-template-columns:1fr}.media-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.content{padding:18px}.top{padding:15px 18px}.metrics{grid-template-columns:repeat(2,1fr)}.nav{grid-template-columns:repeat(2,1fr)}.media-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+  <div class="login-card">
+    <h1>لوحة بُنية</h1>
+    <p>إدارة الموقع والطلبات والمحتوى والتحليلات.</p>
+    <div class="tabs"><button id="tabLogin" class="active">تسجيل الدخول</button><button id="tabActivate">تفعيل Super Admin</button></div>
+    <form id="loginForm" class="login-form">
+      <div class="field"><label>البريد الإلكتروني</label><input id="loginEmail" type="email" autocomplete="username" required></div>
+      <div class="field"><label>كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required></div>
+      <button class="btn primary" type="submit">دخول</button>
+      <button class="btn" type="button" id="forgotBtn">نسيت كلمة المرور</button>
+      <div id="loginMsg" class="login-msg"></div>
+    </form>
+    <form id="activateForm" class="login-form hidden">
+      <div class="notice">البريد المعتمد كـ Super Admin. في أول مرة سيتم إرسال رسالة تأكيد من Supabase إذا كان تأكيد البريد مفعّلًا.</div>
+      <div class="field"><label>Super Admin</label><input id="activateEmail" type="email" value="M.BUNAMI@novarainv.com" readonly></div>
+      <div class="field"><label>كلمة مرور جديدة</label><input id="activatePassword" type="password" minlength="10" required placeholder="10 أحرف على الأقل"></div>
+      <button class="btn primary" type="submit">تفعيل الحساب</button>
+      <div id="activateMsg" class="login-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="shell hidden">
+  <aside class="side">
+    <div class="brand"><b>بُنية</b><span id="roleBadge" class="role"></span></div>
+    <div class="nav" id="nav">
+      <button data-view="dashboard" class="active"><i></i>الرئيسية</button>
+      <button data-view="requests" data-roles="super_admin,manager,marketing"><i></i>الطلبات</button>
+      <button data-view="content" data-roles="super_admin,manager,marketing"><i></i>المحتوى</button>
+      <button data-view="media" data-roles="super_admin,manager,marketing"><i></i>الصور</button>
+      <button data-view="contact"><i></i>التواصل</button>
+      <button data-view="seo"><i></i>SEO</button>
+      <button data-view="tracking"><i></i>التتبع والتحليلات</button>
+      <button data-view="users" data-roles="super_admin"><i></i>Manage Users</button>
+      <button data-view="audit" data-roles="super_admin,manager"><i></i>سجل التغييرات</button>
+    </div>
+    <div class="side-foot"><small id="userEmail"></small><small id="userRole"></small><button id="logoutBtn">تسجيل الخروج</button></div>
+  </aside>
+  <main class="main">
+    <header class="top"><div><h1 id="viewTitle">الرئيسية</h1><p id="todayText"></p></div><div class="top-actions"><a class="btn" href="../" target="_blank">فتح الموقع</a><button class="btn" id="passwordBtn">تغيير كلمة المرور</button></div></header>
+    <div class="content">
+      <section id="view-dashboard" class="view active">
+        <div class="grid metrics">
+          <div class="card metric"><b id="mTotal">0</b><span>إجمالي الطلبات</span></div>
+          <div class="card metric"><b id="mToday">0</b><span>طلبات اليوم</span></div>
+          <div class="card metric"><b id="mMonth">0</b><span>طلبات الشهر</span></div>
+          <div class="card metric"><b id="mNew">0</b><span>جديد</span></div>
+          <div class="card metric"><b id="mQualified">0</b><span>مؤهل</span></div>
+          <div class="card metric"><b id="mWon">0</b><span>تم التعاقد</span></div>
+        </div>
+        <div class="section-head"><div><h2>آخر 14 يوم</h2><p>عدد الطلبات حسب تاريخ الوصول</p></div></div>
+        <div class="card"><div id="dailyChart" class="chart"></div></div>
+        <div class="section-head"><div><h2>حالة الطلبات</h2><p>توزيع الطلبات حسب المرحلة</p></div></div>
+        <div id="statusGrid" class="status-grid"></div>
+        <div class="section-head"><div><h2>أحدث الطلبات</h2><p>آخر الطلبات الواردة من نموذج الموقع</p></div><button class="btn" data-go="requests">عرض الكل</button></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>التاريخ</th><th>الاسم</th><th>الجوال</th><th>نوع المشروع</th><th>الحالة</th></tr></thead><tbody id="recentRequests"></tbody></table></div>
+      </section>
+
+      <section id="view-requests" class="view">
+        <div class="section-head"><div><h2>الطلبات</h2><p>إدارة وفرز ومتابعة الطلبات القادمة من الموقع</p></div><button class="btn" id="exportBtn">تصدير CSV</button></div>
+        <div class="filters"><input id="requestSearch" class="control" placeholder="بحث بالاسم أو الجوال"><select id="requestStatus" class="control"><option value="">كل الحالات</option><option value="new">جديد</option><option value="reviewing">تحت المراجعة</option><option value="contacted">تم التواصل</option><option value="qualified">مؤهل</option><option value="proposal">عرض سعر</option><option value="won">تم التعاقد</option><option value="not_qualified">غير مؤهل</option><option value="closed">مغلق</option></select><input id="requestFrom" class="control" type="date"><input id="requestTo" class="control" type="date"><button class="btn" id="requestFilterBtn">تطبيق</button></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>التاريخ والوقت</th><th>الاسم</th><th>الجوال</th><th>المشروع</th><th>المدينة</th><th>الحالة</th><th></th></tr></thead><tbody id="requestsBody"></tbody></table></div>
+      </section>
+
+      <section id="view-content" class="view">
+        <div class="section-head"><div><h2>محتوى الموقع</h2><p>تعديل النصوص الأساسية بدون تعديل الكود</p></div></div>
+        <div class="filters"><select id="contentSectionFilter" class="control"><option value="">كل الأقسام</option></select></div>
+        <div id="contentList" class="content-list"></div>
+      </section>
+
+      <section id="view-media" class="view">
+        <div class="section-head"><div><h2>الصور والوسائط</h2><p>رفع الصور واستخدام رابطها داخل محتوى الموقع</p></div></div>
+        <div class="card form-grid">
+          <div class="field"><label>رفع صورة</label><input id="mediaFile" type="file" accept="image/*"></div>
+          <div class="field"><label>النص البديل Alt</label><input id="mediaAlt" placeholder="وصف الصورة"></div>
+          <div class="full"><button id="mediaUploadBtn" class="btn primary">رفع الصورة</button></div>
+        </div>
+        <div class="section-head"><div><h2>المكتبة</h2></div></div>
+        <div id="mediaGrid" class="media-grid"></div>
+      </section>
+
+      <section id="view-contact" class="view"><div class="section-head"><div><h2>بيانات التواصل</h2><p>رقم الجوال والواتساب والبريد والعنوان والمنصات</p></div></div><div id="contactSettings" class="settings-grid"></div></section>
+      <section id="view-seo" class="view"><div class="section-head"><div><h2>SEO ومحركات البحث</h2><p>العنوان والوصف والكلمات والتحقق من المحركات</p></div></div><div class="notice" style="margin-bottom:12px">ملاحظة: Google Search Console verification وMeta SEO التي تتطلب وجودها في HTML الخام تحتاج نشرًا إلى ملفات GitHub نفسها أو نقل الموقع إلى استضافة ديناميكية. القيم هنا محفوظة وتُطبق داخل المتصفح، لكنها ليست بديلًا كاملًا للنشر الثابت لمحركات البحث.</div><div id="seoSettings" class="settings-grid"></div></section>
+      <section id="view-tracking" class="view"><div class="section-head"><div><h2>التتبع والتحليلات</h2><p>Google Tag Manager وGoogle Analytics والتكاملات</p></div></div><div class="notice" style="margin-bottom:12px">GTM وGA4 يعملان بإدخال المعرّفات. عرض بيانات GA4 وSearch Console داخل اللوحة نفسها يحتاج ربط Google OAuth/API بحساب يملك الصلاحية.</div><div id="trackingSettings" class="settings-grid"></div></section>
+
+      <section id="view-users" class="view">
+        <div class="section-head"><div><h2>Manage Users</h2><p>إنشاء الحسابات وتحديد الصلاحيات — Super Admin فقط</p></div></div>
+        <div class="card form-grid">
+          <div class="field"><label>الاسم</label><input id="inviteName"></div>
+          <div class="field"><label>البريد</label><input id="inviteEmail" type="email"></div>
+          <div class="field"><label>الصلاحية</label><select id="inviteRole"><option value="manager">مدير</option><option value="technical">تقني</option><option value="marketing">تسويق</option></select></div>
+          <div class="field" style="align-self:end"><button id="inviteBtn" class="btn primary">إرسال دعوة</button></div>
+        </div>
+        <div class="section-head"><div><h2>المستخدمون</h2></div></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>البريد</th><th>الاسم</th><th>الصلاحية</th><th>الحالة</th><th>تاريخ الإنشاء</th><th></th></tr></thead><tbody id="usersBody"></tbody></table></div>
+      </section>
+
+      <section id="view-audit" class="view"><div class="section-head"><div><h2>سجل التغييرات</h2><p>من غيّر ماذا ومتى</p></div></div><div class="table-wrap"><table class="table"><thead><tr><th>التاريخ</th><th>المستخدم</th><th>الإجراء</th><th>العنصر</th><th>المعرف</th></tr></thead><tbody id="auditBody"></tbody></table></div></section>
+    </div>
+  </main>
+</div>
+
+<div id="requestModal" class="modal"><div class="modal-card"><div class="modal-head"><h3>تفاصيل الطلب</h3><button class="close" data-close="requestModal">×</button></div><div id="requestDetails"></div></div></div>
+<div id="passwordModal" class="modal"><div class="modal-card" style="width:min(460px,100%)"><div class="modal-head"><h3>تغيير كلمة المرور</h3><button class="close" data-close="passwordModal">×</button></div><div class="field"><label>كلمة المرور الجديدة</label><input id="newPassword" type="password" minlength="10"></div><button id="savePasswordBtn" class="btn primary" style="margin-top:12px">حفظ</button></div></div>
+<div id="toast" class="toast"></div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const SUPABASE_URL="https://zzcxqsaitkgjlwtowsih.supabase.co";
+const SUPABASE_KEY="sb_publishable_p-6AleErfPt8you1wp5vKA_amxtI9pb";
+const SUPER_EMAIL="M.BUNAMI@novarainv.com";
+const ADMIN_URL="https://mohamedkha-1.github.io/index.html/bunyah-control/";
+const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const $=(s,p=document)=>p.querySelector(s), $$=(s,p=document)=>[...p.querySelectorAll(s)];
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+const roleNames={super_admin:"Super Admin",manager:"مدير",technical:"تقني",marketing:"تسويق"};
+const statusNames={new:"جديد",reviewing:"تحت المراجعة",contacted:"تم التواصل",qualified:"مؤهل",proposal:"عرض سعر",won:"تم التعاقد",not_qualified:"غير مؤهل",closed:"مغلق"};
+const categoryNames={general:"عام",contact:"التواصل",social:"المنصات",content:"المحتوى",seo:"SEO",analytics:"التحليلات",integrations:"التكاملات",technical:"تقني"};
+let session=null, profile=null, requestsCache=[], settingsCache=[], contentCache=[];
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
+function fmtDate(v){if(!v)return"—";return new Intl.DateTimeFormat("ar-SA",{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Riyadh"}).format(new Date(v))}
+function today(){return new Intl.DateTimeFormat("ar-SA",{dateStyle:"full",timeStyle:"short",timeZone:"Asia/Riyadh"}).format(new Date())}
+function canSettings(cat){
+  if(profile?.role==="super_admin")return true;
+  if(profile?.role==="manager")return ["general","contact","social","content","seo"].includes(cat);
+  if(profile?.role==="technical")return ["analytics","seo","integrations","technical"].includes(cat);
+  if(profile?.role==="marketing")return ["contact","social","content","seo"].includes(cat);
+  return false;
+}
+function showLogin(){ $("#login").classList.remove("hidden");$("#app").classList.add("hidden") }
+function showApp(){ $("#login").classList.add("hidden");$("#app").classList.remove("hidden") }
+
+$("#tabLogin").onclick=()=>{ $("#tabLogin").classList.add("active");$("#tabActivate").classList.remove("active");$("#loginForm").classList.remove("hidden");$("#activateForm").classList.add("hidden") };
+$("#tabActivate").onclick=()=>{ $("#tabActivate").classList.add("active");$("#tabLogin").classList.remove("active");$("#activateForm").classList.remove("hidden");$("#loginForm").classList.add("hidden") };
+
+$("#loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();$("#loginMsg").textContent="جاري تسجيل الدخول...";
+  const {error}=await sb.auth.signInWithPassword({email:$("#loginEmail").value.trim(),password:$("#loginPassword").value});
+  $("#loginMsg").textContent=error?error.message:"";
+  if(!error)await boot();
+});
+$("#activateForm").addEventListener("submit",async e=>{
+  e.preventDefault();$("#activateMsg").textContent="جاري التفعيل...";
+  const password=$("#activatePassword").value;
+  const {data,error}=await sb.auth.signUp({email:SUPER_EMAIL,password,options:{emailRedirectTo:ADMIN_URL,data:{full_name:"Super Admin"}}});
+  if(error){$("#activateMsg").textContent=error.message;return}
+  $("#activateMsg").textContent=data.session?"تم التفعيل. جاري فتح اللوحة...":"تم إنشاء الحساب. تحقق من بريدك لتأكيده ثم سجل الدخول.";
+  if(data.session)await boot();
+});
+$("#forgotBtn").onclick=async()=>{
+  const email=$("#loginEmail").value.trim();
+  if(!email){$("#loginMsg").textContent="اكتب البريد أولًا";return}
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:ADMIN_URL});
+  $("#loginMsg").textContent=error?error.message:"تم إرسال رابط إعادة تعيين كلمة المرور.";
+};
+$("#logoutBtn").onclick=async()=>{await sb.auth.signOut();location.reload()};
+$("#passwordBtn").onclick=()=>$("#passwordModal").classList.add("open");
+$("#savePasswordBtn").onclick=async()=>{
+  const p=$("#newPassword").value;if(p.length<10){toast("استخدم 10 أحرف على الأقل");return}
+  const {error}=await sb.auth.updateUser({password:p});if(error)toast(error.message);else{toast("تم تغيير كلمة المرور");$("#passwordModal").classList.remove("open");$("#newPassword").value=""}
+};
+$$("[data-close]").forEach(b=>b.onclick=()=>$("#"+b.dataset.close).classList.remove("open"));
+
+async function boot(){
+  const {data}=await sb.auth.getSession();session=data.session;
+  if(!session){showLogin();return}
+  const {data:p,error}=await sb.from("admin_profiles").select("*").eq("user_id",session.user.id).maybeSingle();
+  if(error||!p||!p.active){await sb.auth.signOut();showLogin();$("#loginMsg").textContent="هذا الحساب غير مخول للوصول إلى لوحة بُنية.";return}
+  profile=p;showApp();$("#roleBadge").textContent=roleNames[p.role]||p.role;$("#userEmail").textContent=p.email;$("#userRole").textContent=roleNames[p.role]||p.role;$("#todayText").textContent=today();
+  $$("[data-roles]").forEach(el=>el.classList.toggle("hidden",!el.dataset.roles.split(",").includes(p.role)));
+  wireNav();await Promise.all([loadDashboard(),loadSettings(),loadContent()]);
+  if(location.hash.includes("type=recovery")||location.hash.includes("type=invite"))$("#passwordModal").classList.add("open");
+}
+
+function wireNav(){
+  $$("#nav button").forEach(btn=>btn.onclick=()=>openView(btn.dataset.view));
+  $$("[data-go]").forEach(btn=>btn.onclick=()=>openView(btn.dataset.go));
+}
+async function openView(name){
+  $$(".view").forEach(v=>v.classList.remove("active"));$("#view-"+name)?.classList.add("active");
+  $$("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===name));
+  const titles={dashboard:"الرئيسية",requests:"الطلبات",content:"المحتوى",media:"الصور والوسائط",contact:"بيانات التواصل",seo:"SEO ومحركات البحث",tracking:"التتبع والتحليلات",users:"Manage Users",audit:"سجل التغييرات"};
+  $("#viewTitle").textContent=titles[name]||"لوحة بُنية";
+  if(name==="requests")await loadRequests();
+  if(name==="media")await loadMedia();
+  if(name==="users")await loadUsers();
+  if(name==="audit")await loadAudit();
+}
+
+async function loadDashboard(){
+  if(!["super_admin","manager","marketing"].includes(profile.role)){["mTotal","mToday","mMonth","mNew","mQualified","mWon"].forEach(id=>$("#"+id).textContent="—");return}
+  const [{data:d},{data:daily},{data:status},{data:recent}]=await Promise.all([
+    sb.from("request_dashboard").select("*").single(),
+    sb.from("request_daily_counts").select("*").order("day",{ascending:true}),
+    sb.from("request_status_counts").select("*"),
+    sb.from("project_requests").select("id,created_at,name,phone,project_type,status").order("created_at",{ascending:false}).limit(6)
+  ]);
+  if(d){$("#mTotal").textContent=d.total_requests??0;$("#mToday").textContent=d.today_requests??0;$("#mMonth").textContent=d.month_requests??0;$("#mNew").textContent=d.new_requests??0;$("#mQualified").textContent=d.qualified_requests??0;$("#mWon").textContent=d.won_requests??0}
+  renderDaily(daily||[]);renderStatus(status||[]);
+  $("#recentRequests").innerHTML=(recent||[]).map(r=>`<tr><td>${fmtDate(r.created_at)}</td><td>${esc(r.name)}</td><td dir="ltr">${esc(r.phone)}</td><td>${esc(r.project_type||"—")}</td><td><span class="pill ${esc(r.status)}">${statusNames[r.status]||r.status}</span></td></tr>`).join("")||'<tr><td colspan="5" class="empty">لا توجد طلبات بعد</td></tr>';
+}
+function renderDaily(rows){
+  const map=new Map(rows.map(r=>[r.day,Number(r.count)])), days=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.toLocaleDateString("en-CA",{timeZone:"Asia/Riyadh"});days.push({k,n:map.get(k)||0})}
+  const max=Math.max(1,...days.map(x=>x.n));$("#dailyChart").innerHTML=days.map(x=>`<div class="bar" title="${x.n}" style="height:${Math.max(4,(x.n/max)*150)}px"><span>${x.k.slice(5)}</span></div>`).join("");
+}
+function renderStatus(rows){
+  const all=["new","reviewing","contacted","qualified","proposal","won","not_qualified","closed"], m=new Map(rows.map(r=>[r.status,Number(r.count)]));
+  $("#statusGrid").innerHTML=all.map(s=>`<div class="status-box"><b>${m.get(s)||0}</b><span>${statusNames[s]}</span></div>`).join("");
+}
+
+async function loadRequests(){
+  let q=sb.from("project_requests").select("*").order("created_at",{ascending:false}).limit(500);
+  const s=$("#requestSearch").value.trim(),st=$("#requestStatus").value,from=$("#requestFrom").value,to=$("#requestTo").value;
+  if(st)q=q.eq("status",st);if(from)q=q.gte("created_at",new Date(from+"T00:00:00+03:00").toISOString());if(to)q=q.lte("created_at",new Date(to+"T23:59:59+03:00").toISOString());
+  if(s)q=q.or(`name.ilike.%${s.replace(/[%_,()]/g,"")}%,phone.ilike.%${s.replace(/[%_,()]/g,"")}%`);
+  const {data,error}=await q;if(error){toast(error.message);return}requestsCache=data||[];renderRequests();
+}
+function renderRequests(){
+  $("#requestsBody").innerHTML=requestsCache.map(r=>`<tr><td>${fmtDate(r.created_at)}</td><td>${esc(r.name)}</td><td dir="ltr">${esc(r.phone)}</td><td>${esc(r.project_type||"—")}</td><td>${esc(r.city||"—")}</td><td><span class="pill ${esc(r.status)}">${statusNames[r.status]||r.status}</span></td><td><button class="btn" data-open-request="${r.id}">فتح</button></td></tr>`).join("")||'<tr><td colspan="7" class="empty">لا توجد نتائج</td></tr>';
+  $$("[data-open-request]").forEach(b=>b.onclick=()=>openRequest(b.dataset.openRequest));
+}
+$("#requestFilterBtn").onclick=loadRequests;
+async function openRequest(id){
+  const r=requestsCache.find(x=>x.id===id);if(!r)return;
+  const [{data:files},{data:notes}]=await Promise.all([sb.from("project_request_files").select("*").eq("request_id",id),sb.from("request_notes").select("*").eq("request_id",id).order("created_at",{ascending:false})]);
+  $("#requestDetails").innerHTML=`
+  <div class="form-grid">
+    <div class="field"><label>الاسم</label><input value="${esc(r.name)}" readonly></div>
+    <div class="field"><label>الجوال</label><input value="${esc(r.phone)}" readonly dir="ltr"></div>
+    <div class="field"><label>نوع المشروع</label><input value="${esc(r.project_type||"")}" readonly></div>
+    <div class="field"><label>المدينة</label><input value="${esc(r.city||"")}" readonly></div>
+    <div class="field"><label>مرحلة المشروع</label><input value="${esc(r.project_stage||"")}" readonly></div>
+    <div class="field"><label>التاريخ</label><input value="${esc(fmtDate(r.created_at))}" readonly></div>
+    <div class="field full"><label>الحالة</label><select id="modalStatus">${Object.entries(statusNames).map(([k,v])=>`<option value="${k}" ${k===r.status?"selected":""}>${v}</option>`).join("")}</select></div>
+    ${r.external_files_url?`<div class="field full"><label>رابط الملفات</label><a class="btn" target="_blank" rel="noopener" href="${esc(r.external_files_url)}">فتح الرابط</a></div>`:""}
+    <div class="field full"><label>المصدر / UTM</label><div class="notice">${esc([r.utm_source,r.utm_medium,r.utm_campaign].filter(Boolean).join(" / ")||r.source||"website")}</div></div>
+    <div class="field full"><label>الملفات المرفوعة</label><div id="requestFiles">${(files||[]).map(f=>`<button class="btn" data-file-path="${esc(f.storage_path)}">${esc(f.file_name)}</button>`).join(" ")||'<span class="muted">لا توجد ملفات</span>'}</div></div>
+    <div class="field full"><label>ملاحظة داخلية</label><textarea id="newNote"></textarea><button class="btn" id="addNoteBtn">إضافة الملاحظة</button></div>
+    <div class="field full"><label>الملاحظات السابقة</label><div>${(notes||[]).map(n=>`<div class="notice" style="margin-bottom:7px">${esc(n.body)}<br><small>${fmtDate(n.created_at)}</small></div>`).join("")||'<span class="muted">لا توجد ملاحظات</span>'}</div></div>
+    <div class="full"><button class="btn primary" id="saveRequestBtn">حفظ حالة الطلب</button></div>
+  </div>`;
+  $("#requestModal").classList.add("open");
+  $$("[data-file-path]",$("#requestDetails")).forEach(b=>b.onclick=async()=>{const {data,error}=await sb.storage.from("bunyah-request-files").createSignedUrl(b.dataset.filePath,300);if(error)toast(error.message);else window.open(data.signedUrl,"_blank")});
+  $("#saveRequestBtn").onclick=async()=>{const status=$("#modalStatus").value,patch={status};if(status==="contacted"&&!r.contacted_at)patch.contacted_at=new Date().toISOString();if(["won","closed","not_qualified"].includes(status))patch.closed_at=new Date().toISOString();const {error}=await sb.from("project_requests").update(patch).eq("id",id);if(error)toast(error.message);else{toast("تم حفظ الحالة");$("#requestModal").classList.remove("open");await Promise.all([loadRequests(),loadDashboard()])}};
+  $("#addNoteBtn").onclick=async()=>{const body=$("#newNote").value.trim();if(!body)return;const {error}=await sb.from("request_notes").insert({request_id:id,body,created_by:profile.user_id});if(error)toast(error.message);else{toast("تمت إضافة الملاحظة");openRequest(id)}};
+}
+$("#exportBtn").onclick=()=>{
+  if(!requestsCache.length){toast("لا توجد بيانات للتصدير");return}
+  const cols=["created_at","name","phone","project_type","city","project_stage","status","utm_source","utm_medium","utm_campaign"];
+  const csv=[cols.join(","),...requestsCache.map(r=>cols.map(k=>'"'+String(r[k]??"").replaceAll('"','""')+'"').join(","))].join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download="bunyah-requests.csv";a.click();URL.revokeObjectURL(a.href);
+};
+
+async function loadContent(){
+  const {data,error}=await sb.from("cms_content").select("*").order("section").order("sort_order");if(error){console.error(error);return}contentCache=data||[];
+  const sections=[...new Set(contentCache.map(x=>x.section))];$("#contentSectionFilter").innerHTML='<option value="">كل الأقسام</option>'+sections.map(s=>`<option>${esc(s)}</option>`).join("");renderContent();
+}
+function renderContent(){
+  const sec=$("#contentSectionFilter").value;const rows=contentCache.filter(x=>!sec||x.section===sec);
+  $("#contentList").innerHTML=rows.map(x=>`<div class="content-row"><div class="meta"><b>${esc(x.label)}</b><small>${esc(x.section)} · ${esc(x.key)}</small></div><div>${x.content_type==="textarea"?`<textarea data-content-input="${esc(x.key)}">${esc(x.value)}</textarea>`:`<input data-content-input="${esc(x.key)}" value="${esc(x.value)}">`}</div><button class="btn" data-save-content="${esc(x.key)}">حفظ</button></div>`).join("")||'<div class="empty">لا يوجد محتوى</div>';
+  $$("[data-save-content]").forEach(b=>b.onclick=()=>saveContent(b.dataset.saveContent));
+}
+$("#contentSectionFilter").onchange=renderContent;
+async function saveContent(key){
+  const input=$(`[data-content-input="${CSS.escape(key)}"]`);const {error}=await sb.from("cms_content").update({value:input.value,updated_by:profile.user_id}).eq("key",key);if(error)toast(error.message);else{toast("تم حفظ المحتوى");const x=contentCache.find(x=>x.key===key);if(x)x.value=input.value}
+}
+
+async function loadSettings(){
+  const {data,error}=await sb.from("cms_settings").select("*").order("category").order("key");if(error){console.error(error);return}settingsCache=data||[];
+  renderSettingsGroup("contactSettings",["contact","social","general"]);
+  renderSettingsGroup("seoSettings",["seo"]);
+  renderSettingsGroup("trackingSettings",["analytics","integrations","technical"]);
+}
+function renderSettingsGroup(id,cats){
+  $("#"+id).innerHTML=settingsCache.filter(x=>cats.includes(x.category)).map(x=>`<div class="setting"><div class="setting-head"><b>${esc(x.label)}</b><small>${categoryNames[x.category]||x.category}</small></div><input class="control" style="width:100%" data-setting-input="${esc(x.key)}" value="${esc(x.value)}" ${canSettings(x.category)?"":"disabled"}><div class="setting-actions"><button class="btn" data-save-setting="${esc(x.key)}" ${canSettings(x.category)?"":"disabled"}>حفظ</button></div></div>`).join("");
+  $$("[data-save-setting]",$("#"+id)).forEach(b=>b.onclick=()=>saveSetting(b.dataset.saveSetting));
+}
+async function saveSetting(key){
+  const row=settingsCache.find(x=>x.key===key);if(!row||!canSettings(row.category))return;
+  const input=$(`[data-setting-input="${CSS.escape(key)}"]`);const {error}=await sb.from("cms_settings").update({value:input.value,updated_by:profile.user_id}).eq("key",key);if(error)toast(error.message);else{row.value=input.value;toast("تم حفظ الإعداد")}
+}
+
+async function loadMedia(){
+  const {data,error}=await sb.from("media_assets").select("*").order("created_at",{ascending:false}).limit(200);if(error){toast(error.message);return}
+  $("#mediaGrid").innerHTML=(data||[]).map(m=>`<div class="media"><img src="${esc(m.public_url)}" alt="${esc(m.alt_text||"")}"><div class="media-body"><b>${esc(m.name)}</b><div class="media-actions"><button class="btn" data-copy-url="${esc(m.public_url)}">نسخ الرابط</button><button class="btn danger" data-delete-media="${m.id}" data-path="${esc(m.storage_path)}">حذف</button></div></div></div>`).join("")||'<div class="empty">لا توجد صور مرفوعة</div>';
+  $$("[data-copy-url]").forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copyUrl);toast("تم نسخ الرابط")});
+  $$("[data-delete-media]").forEach(b=>b.onclick=async()=>{if(!confirm("حذف الصورة؟"))return;await sb.storage.from("bunyah-site-media").remove([b.dataset.path]);const {error}=await sb.from("media_assets").delete().eq("id",b.dataset.deleteMedia);if(error)toast(error.message);else{toast("تم الحذف");loadMedia()}});
+}
+$("#mediaUploadBtn").onclick=async()=>{
+  const file=$("#mediaFile").files[0];if(!file){toast("اختر صورة");return}if(file.size>15*1024*1024){toast("الحد الأقصى 15MB");return}
+  const ext=(file.name.split(".").pop()||"jpg").toLowerCase(),path=`${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}.${ext}`;
+  const {error:upErr}=await sb.storage.from("bunyah-site-media").upload(path,file,{contentType:file.type,upsert:false});if(upErr){toast(upErr.message);return}
+  const {data:urlData}=sb.storage.from("bunyah-site-media").getPublicUrl(path);
+  const {error}=await sb.from("media_assets").insert({name:file.name,storage_path:path,public_url:urlData.publicUrl,alt_text:$("#mediaAlt").value.trim(),mime_type:file.type,size_bytes:file.size,created_by:profile.user_id});
+  if(error)toast(error.message);else{$("#mediaFile").value="";$("#mediaAlt").value="";toast("تم رفع الصورة");loadMedia()}
+};
+
+async function loadUsers(){
+  if(profile.role!=="super_admin")return;
+  const {data,error}=await sb.from("admin_profiles").select("*").order("created_at");if(error){toast(error.message);return}
+  $("#usersBody").innerHTML=(data||[]).map(u=>`<tr><td>${esc(u.email)}</td><td>${esc(u.full_name||"—")}</td><td><select class="control" data-user-role="${u.user_id}" ${u.email.toLowerCase()===SUPER_EMAIL.toLowerCase()?"disabled":""}>${Object.entries(roleNames).map(([k,v])=>`<option value="${k}" ${k===u.role?"selected":""} ${k==="super_admin"&&u.email.toLowerCase()!==SUPER_EMAIL.toLowerCase()?"disabled":""}>${v}</option>`).join("")}</select></td><td>${u.active?'<span class="ok-text">نشط</span>':'<span class="danger-text">موقوف</span>'}</td><td>${fmtDate(u.created_at)}</td><td>${u.email.toLowerCase()===SUPER_EMAIL.toLowerCase()?'<span class="muted">الحساب الأساسي</span>':`<button class="btn" data-user-toggle="${u.user_id}" data-active="${u.active}">${u.active?"تعطيل":"تفعيل"}</button> <button class="btn danger" data-user-delete="${u.user_id}">حذف</button>`}</td></tr>`).join("");
+  $$("[data-user-role]").forEach(s=>s.onchange=()=>userAction({action:"set_role",user_id:s.dataset.userRole,role:s.value}));
+  $$("[data-user-toggle]").forEach(b=>b.onclick=()=>userAction({action:b.dataset.active==="true"?"disable":"enable",user_id:b.dataset.userToggle}));
+  $$("[data-user-delete]").forEach(b=>b.onclick=()=>{if(confirm("حذف هذا المستخدم نهائيًا؟"))userAction({action:"delete",user_id:b.dataset.userDelete})});
+}
+$("#inviteBtn").onclick=async()=>{const email=$("#inviteEmail").value.trim(),full_name=$("#inviteName").value.trim(),role=$("#inviteRole").value;if(!email){toast("أدخل البريد");return}await userAction({action:"invite",email,full_name,role});$("#inviteEmail").value="";$("#inviteName").value=""};
+async function userAction(body){const {data,error}=await sb.functions.invoke("admin-users",{body});if(error||data?.error){toast(data?.error||error.message);return}toast(body.action==="invite"?"تم إرسال الدعوة":"تم تنفيذ الإجراء");loadUsers()}
+
+async function loadAudit(){
+  const {data,error}=await sb.from("audit_logs").select("*").order("created_at",{ascending:false}).limit(120);if(error){toast(error.message);return}
+  $("#auditBody").innerHTML=(data||[]).map(a=>`<tr><td>${fmtDate(a.created_at)}</td><td>${esc(a.actor_id||"system")}</td><td>${esc(a.action)}</td><td>${esc(a.entity_type)}</td><td>${esc(a.entity_id||"—")}</td></tr>`).join("")||'<tr><td colspan="5" class="empty">لا يوجد سجل بعد</td></tr>';
+}
+
+sb.auth.onAuthStateChange((event,newSession)=>{session=newSession;if(event==="SIGNED_OUT")showLogin()});
+boot();
+</script>
+</body>
+</html>
