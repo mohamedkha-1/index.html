@@ -120,6 +120,8 @@ async function submitForm(e){
   if(btn){btn.disabled=true;btn.textContent="جاري الإرسال..."}if(msg)msg.textContent="";
   try{
     const files=[...(fileInput?.files||[])];
+    if(files.length>8)throw new Error("الحد الأقصى 8 ملفات");
+    if(files.some(f=>f.size>20*1024*1024))throw new Error("الحد الأقصى لكل ملف 20MB");
     const body=getFormValues(form);
     body.files=files.map(f=>({name:f.name,type:f.type||"application/octet-stream",size:f.size}));
     const res=await fetch(SUPABASE_URL+"/functions/v1/submit-request",{
