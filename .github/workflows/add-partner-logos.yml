@@ -1,0 +1,76 @@
+name: Add new partner logos
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/add-partner-logos.yml"
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Download partner logos
+        run: |
+          mkdir -p assets/logos/partners
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/f4070e00-ebf7-4031-9db1-b9883670a8fe.png" -o assets/logos/partners/saon.png
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/e41673b0-c09b-4091-ba71-e125b5deb6d7.png" -o assets/logos/partners/sanmarzano.png
+          curl -fL --retry 3 "https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/036fbc7d-b773-4f3a-87b9-037761cd57e6.png" -o assets/logos/partners/mid.png
+          for f in assets/logos/partners/*.png; do test -s "$f"; done
+      - name: Add logos to partners section
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          
+          # Add new partner logo CSS
+          css_anchor = ".logo-midsajj{background-size:36% auto}"
+          css_new = """.logo-midsajj{background-size:36% auto}
+          .logo-saon{background-color:#111827!important;background-image:url("assets/logos/partners/saon.png");background-size:76% auto}
+          .logo-sanmarzano{background-image:url("assets/logos/partners/sanmarzano.png");background-size:52% auto}
+          .logo-mid{background-image:url("assets/logos/partners/mid.png");background-size:58% auto}"""
+          if ".logo-saon{" not in s:
+              if css_anchor not in s:
+                  raise SystemExit("Partner logo CSS anchor not found")
+              s=s.replace(css_anchor,css_new,1)
+          
+          # Replace partner marquees with expanded, perfectly duplicated sequences
+          pattern = r'<div class="marquee">.*?</div><div class="marquee rev">.*?</div></section>'
+          m = re.search(pattern,s,flags=re.S)
+          if not m:
+              raise SystemExit("Partner marquee block not found")
+          
+          row1 = [
+          '<div class="logo-box logo-light logo-fahras"><span>Fahras by Mid-Sajj</span></div>',
+          '<div class="logo-box logo-light logo-qomra"><span>Qomra</span></div>',
+          '<div class="logo-box logo-light logo-nouf"><span>Princess Nourah University</span></div>',
+          '<div class="logo-box logo-light logo-elixir"><span>Elixir Bun</span></div>',
+          '<div class="logo-box logo-dark logo-saon"><span>SAON logistical services</span></div>',
+          '<div class="logo-box logo-light logo-sanmarzano"><span>San Marzano Ristorante</span></div>'
+          ]
+          row2 = [
+          '<div class="logo-box logo-dark logo-kalamashii"><span>Kalamashii</span></div>',
+          '<div class="logo-box logo-light logo-thania"><span>Thaniah</span></div>',
+          '<div class="logo-box logo-light logo-roshn"><span>ROSHN</span></div>',
+          '<div class="logo-box logo-dark logo-midsajj"><span>Mid-Sajj</span></div>',
+          '<div class="logo-box logo-light logo-mid"><span>MID</span></div>'
+          ]
+          
+          new_block = '<div class="marquee">' + ''.join(row1+row1) + '</div><div class="marquee rev">' + ''.join(row2+row2) + '</div></section>'
+          s = s[:m.start()] + new_block + s[m.end():]
+          p.write_text(s,encoding="utf-8")
+          PY
+      - name: Remove one-time workflow
+        run: rm -f .github/workflows/add-partner-logos.yml
+      - name: Commit partner logos
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/logos/partners .github/workflows/add-partner-logos.yml
+          git commit -m "Add SAON San Marzano and MID partner logos"
+          git push
