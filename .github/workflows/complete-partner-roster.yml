@@ -1,0 +1,195 @@
+name: Complete partner roster
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/complete-partner-roster.yml"
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Normalize uploaded transparent logos
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          import math
+
+          base=Path("assets/logos/partners")
+          def clear_bg(path,bg,inner,outer):
+              if not path.exists(): return
+              im=Image.open(path).convert("RGBA")
+              px=im.load(); br,bg_,bb=bg
+              for y in range(im.height):
+                  for x in range(im.width):
+                      r,g,b,a=px[x,y]
+                      d=((r-br)**2+(g-bg_)**2+(b-bb)**2)**0.5
+                      if d<=inner: na=0
+                      elif d>=outer: na=a
+                      else: na=int(a*(d-inner)/(outer-inner))
+                      px[x,y]=(r,g,b,na)
+              im.save(path,"PNG",optimize=True)
+          clear_bg(base/"saon.png",(0,0,0),8,34)
+          clear_bg(base/"sanmarzano.png",(255,255,255),8,38)
+          clear_bg(base/"mid.png",(255,255,255),8,38)
+          PY
+      - name: Build 21 unique partner cards
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          
+          css = """
+          <style id="partners-complete-v2">
+          .clients .partner-grid{
+            width:min(1500px,calc(100% - 48px));
+            margin:0 auto;
+            display:grid;
+            grid-template-columns:repeat(4,minmax(0,1fr));
+            gap:16px;
+          }
+          .clients .partner-grid .logo-box{
+            min-width:0!important;
+            width:100%!important;
+            height:132px!important;
+            padding:28px 34px!important;
+            border-radius:28px!important;
+            background-color:#F3EFED!important;
+            background-repeat:no-repeat!important;
+            background-position:center!important;
+            background-size:contain!important;
+            background-origin:content-box!important;
+            overflow:hidden!important;
+          }
+          .clients .partner-grid .logo-saon{
+            background-color:#F3EFED!important;
+          }
+          .clients .partner-grid .logo-wordmark{
+            background-image:none!important;
+            display:flex!important;
+            align-items:center!important;
+            justify-content:center!important;
+            text-align:center!important;
+          }
+          .clients .partner-grid .logo-wordmark span{
+            position:static!important;
+            width:auto!important;
+            height:auto!important;
+            overflow:visible!important;
+            clip:auto!important;
+            display:block!important;
+            color:#171314!important;
+            font-family:Poppins,Cairo,Arial,sans-serif!important;
+            font-size:clamp(18px,1.7vw,28px)!important;
+            font-weight:600!important;
+            letter-spacing:.08em!important;
+            line-height:1.1!important;
+            white-space:nowrap!important;
+          }
+          .clients .partner-grid .logo-wordmark.ar span{
+            font-family:Cairo,Arial,sans-serif!important;
+            letter-spacing:0!important;
+          }
+          @media(max-width:1100px){
+            .clients .partner-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+          }
+          @media(max-width:760px){
+            .clients .partner-grid{
+              width:min(100% - 28px,720px);
+              grid-template-columns:repeat(2,minmax(0,1fr));
+              gap:12px
+            }
+            .clients .partner-grid .logo-box{
+              height:112px!important;
+              border-radius:22px!important;
+              padding:22px 26px!important;
+            }
+            .clients .partner-grid .logo-wordmark span{
+              font-size:clamp(15px,4.2vw,21px)!important;
+            }
+          }
+          </style>
+          """
+          
+          if 'id="partners-complete-v2"' in s:
+              s=re.sub(r'<style id="partners-complete-v2">.*?</style>',css.strip(),s,flags=re.S)
+          else:
+              s=s.replace("</head>",css+"</head>",1)
+          
+          # Normalize SAON class background if an older dark override exists.
+          s=re.sub(
+              r'\.logo-saon\{[^}]*\}',
+              '.logo-saon{background-image:url("assets/logos/partners/saon.png");background-size:76% auto}',
+              s,
+              count=1
+          )
+          
+          partners = [
+          ('fahras','Fahras by Mid-Sajj','logo-light logo-fahras'),
+          ('qomra','Qomra','logo-light logo-qomra'),
+          ('princess-nourah-university','Princess Nourah University','logo-light logo-nouf'),
+          ('elixir-bun','Elixir Bun','logo-light logo-elixir'),
+          ('kalamashii','Kalamashii','logo-light logo-kalamashii'),
+          ('thaniah','Thaniah','logo-light logo-thania'),
+          ('roshn','ROSHN','logo-light logo-roshn'),
+          ('mid-sajj','Mid-Sajj','logo-light logo-midsajj'),
+          ('mid','MID','logo-light logo-mid'),
+          ('san-marzano','San Marzano Ristorante','logo-light logo-sanmarzano'),
+          ('saon','SAON logistical services','logo-light logo-saon'),
+          ('markab','MARKAB','logo-light logo-wordmark'),
+          ('sica','SICA','logo-light logo-wordmark'),
+          ('steam','STEAM','logo-light logo-wordmark'),
+          ('tend','TEND','logo-light logo-wordmark'),
+          ('willow','WILLOW','logo-light logo-wordmark'),
+          ('dermacare','DERMACARE','logo-light logo-wordmark'),
+          ('dhafa','ضفة','logo-light logo-wordmark ar'),
+          ('al-aziziyah','العزيزية','logo-light logo-wordmark ar'),
+          ('listen-valley','LISTEN VALLEY','logo-light logo-wordmark'),
+          ('sophia','SOPHIA','logo-light logo-wordmark'),
+          ]
+          
+          cards=[]
+          for key,label,classes in partners:
+              cards.append(f'<div class="logo-box {classes}" data-partner="{key}"><span>{label}</span></div>')
+          grid='<div class="partner-grid">'+''.join(cards)+'</div>'
+          
+          # Replace any existing partner-grid OR old marquees inside clients section.
+          section_match=re.search(r'<section class="section clients">.*?</section>',s,flags=re.S)
+          if not section_match:
+              raise SystemExit("clients section not found")
+          section=section_match.group(0)
+          head_end=section.find('</div>', section.find('clients-head')) + len('</div>')
+          # clients-head itself contains nested tags but only one wrapping div; safer use known marker after closing p/h3:
+          body_start = section.find('<div class="partner-grid">')
+          if body_start < 0:
+              body_start = section.find('<div class="marquee">')
+          if body_start < 0:
+              raise SystemExit("partners body not found")
+          new_section = section[:body_start] + grid + '</section>'
+          s = s[:section_match.start()] + new_section + s[section_match.end():]
+          
+          # Verify exact unique count before saving.
+          keys=re.findall(r'data-partner="([^"]+)"',new_section)
+          if len(keys)!=21 or len(set(keys))!=21:
+              raise SystemExit(f"Expected 21 unique partners, got {len(keys)} total / {len(set(keys))} unique")
+          
+          p.write_text(s,encoding="utf-8")
+          PY
+      - name: Remove one-time workflow
+        run: rm -f .github/workflows/complete-partner-roster.yml
+      - name: Commit roster
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/logos/partners .github/workflows/complete-partner-roster.yml
+          git commit -m "Complete partner roster with 21 unique entries"
+          git push
