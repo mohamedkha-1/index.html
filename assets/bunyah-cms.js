@@ -27,23 +27,21 @@ function normalizeSaudi(v){
   else if(d.startsWith("5")&&d.length===9)d="966"+d;
   return d;
 }
-function applyContent(map){
-  const byKey=Object.fromEntries((map||[]).map(x=>[x.key,x.value]));
-  const setText=(sel,key)=>{const el=$(sel);if(el&&byKey[key]!=null)el.textContent=byKey[key]};
-  setText(".hero-copy .ey","hero_eyebrow");
-  const h1=$(".hero-copy h1");
-  if(h1){
-    if(byKey.hero_title_1!=null){
-      const tn=[...h1.childNodes].find(n=>n.nodeType===Node.TEXT_NODE);
-      if(tn)tn.nodeValue=byKey.hero_title_1;
-    }
-    const span=$("span",h1);if(span&&byKey.hero_title_2!=null)span.textContent=byKey.hero_title_2;
+function applyContent(rows){
+  for(const item of (rows||[])){
+    if(!item.selector)continue;
+    let el=null;
+    try{el=document.querySelector(item.selector)}catch(_){continue}
+    if(!el)continue;
+    const value=item.value??"";
+    if(item.apply_to==="src")el.setAttribute("src",value);
+    else if(item.apply_to==="href")el.setAttribute("href",value);
+    else if(item.apply_to==="alt")el.setAttribute("alt",value);
+    else if(item.apply_to==="leading_text"){
+      const tn=[...el.childNodes].find(n=>n.nodeType===Node.TEXT_NODE);
+      if(tn)tn.nodeValue=value;
+    }else el.textContent=value;
   }
-  const heroPs=$$(".hero-copy > p");if(heroPs[0]&&byKey.hero_body_1!=null)heroPs[0].textContent=byKey.hero_body_1;if(heroPs[1]&&byKey.hero_body_2!=null)heroPs[1].textContent=byKey.hero_body_2;
-  setText(".services .section-title h2","services_title");setText(".services .section-title > p","services_intro");
-  setText(".projects .section-title h2","projects_title");setText(".projects .section-title > p","projects_intro");
-  setText(".contact-copy h2","contact_title");setText(".contact-copy > p","contact_intro");
-  setText(".footer-slogan","footer_slogan");
 }
 function applySettings(rows){
   const s=Object.fromEntries((rows||[]).map(x=>[x.key,x.value]));
@@ -88,7 +86,7 @@ function loadGTM(id){
 }
 async function loadCMS(){
   const [{data:content},{data:settings}]=await Promise.all([
-    sb.from("cms_content").select("key,value").eq("published",true),
+    sb.from("cms_content").select("key,value,selector,apply_to").eq("published",true),
     sb.from("cms_settings").select("key,value").eq("is_public",true)
   ]);
   if(content)applyContent(content);
