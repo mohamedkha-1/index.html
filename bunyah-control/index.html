@@ -28,7 +28,6 @@
       <div class="field"><label>البريد الإلكتروني</label><input id="loginEmail" type="email" autocomplete="username" required></div>
       <div class="field"><label>كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required></div>
       <button class="btn primary" type="submit">دخول</button>
-      <button class="btn" type="button" id="forgotBtn">نسيت كلمة المرور</button>
       <div id="loginMsg" class="login-msg"></div>
     </form>
     <form id="activateForm" class="login-form hidden">
@@ -172,12 +171,6 @@ $("#activateForm").addEventListener("submit",async e=>{
   $("#activateMsg").textContent=data.session?"تم التفعيل. جاري فتح اللوحة...":"تم إنشاء الحساب. تحقق من بريدك لتأكيده ثم سجل الدخول.";
   if(data.session)await boot();
 });
-$("#forgotBtn").onclick=async()=>{
-  const email=$("#loginEmail").value.trim();
-  if(!email){$("#loginMsg").textContent="اكتب البريد أولًا";return}
-  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:ADMIN_URL});
-  $("#loginMsg").textContent=error?error.message:"تم إرسال رابط إعادة تعيين كلمة المرور.";
-};
 $("#logoutBtn").onclick=async()=>{await sb.auth.signOut();location.reload()};
 $("#passwordBtn").onclick=()=>$("#passwordModal").classList.add("open");
 $("#savePasswordBtn").onclick=async()=>{
