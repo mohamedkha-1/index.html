@@ -157,19 +157,45 @@ function showApp(){ $("#login").classList.add("hidden");$("#app").classList.remo
 $("#tabLogin").onclick=()=>{ $("#tabLogin").classList.add("active");$("#tabActivate").classList.remove("active");$("#loginForm").classList.remove("hidden");$("#activateForm").classList.add("hidden") };
 $("#tabActivate").onclick=()=>{ $("#tabActivate").classList.add("active");$("#tabLogin").classList.remove("active");$("#activateForm").classList.remove("hidden");$("#loginForm").classList.add("hidden") };
 
+async function confirmSuperAdminEmail(){
+  const {data,error}=await sb.functions.invoke("confirm-super-admin",{body:{activate:true}});
+  if(error||data?.error)throw new Error(data?.error||error?.message||"تعذر تأكيد البريد");
+  return true;
+}
 $("#loginForm").addEventListener("submit",async e=>{
   e.preventDefault();$("#loginMsg").textContent="جاري تسجيل الدخول...";
-  const {error}=await sb.auth.signInWithPassword({email:$("#loginEmail").value.trim(),password:$("#loginPassword").value});
+  const email=$("#loginEmail").value.trim(),password=$("#loginPassword").value;
+  let {error}=await sb.auth.signInWithPassword({email,password});
+  if(error && email.toLowerCase()===SUPER_EMAIL.toLowerCase() && /email not confirmed/i.test(error.message||"")){
+    $("#loginMsg").textContent="جاري تفعيل البريد...";
+    try{
+      await confirmSuperAdminEmail();
+      ({error}=await sb.auth.signInWithPassword({email,password}));
+    }catch(confirmErr){
+      $("#loginMsg").textContent=confirmErr.message||"تعذر تفعيل البريد";
+      return;
+    }
+  }
   $("#loginMsg").textContent=error?error.message:"";
   if(!error)await boot();
 });
 $("#activateForm").addEventListener("submit",async e=>{
   e.preventDefault();$("#activateMsg").textContent="جاري التفعيل...";
   const password=$("#activatePassword").value;
-  const {data,error}=await sb.auth.signUp({email:SUPER_EMAIL,password,options:{emailRedirectTo:ADMIN_URL,data:{full_name:"Super Admin"}}});
-  if(error){$("#activateMsg").textContent=error.message;return}
-  $("#activateMsg").textContent=data.session?"تم التفعيل. جاري فتح اللوحة...":"تم إنشاء الحساب. تحقق من بريدك لتأكيده ثم سجل الدخول.";
-  if(data.session)await boot();
+  if(password.length<10){$("#activateMsg").textContent="استخدم كلمة مرور لا تقل عن 10 أحرف";return}
+  const {error:signUpError}=await sb.auth.signUp({email:SUPER_EMAIL,password,options:{data:{full_name:"Super Admin"}}});
+  if(signUpError && !/already|registered|exists/i.test(signUpError.message||"")){
+    $("#activateMsg").textContent=signUpError.message;return;
+  }
+  try{
+    await confirmSuperAdminEmail();
+    const {error:loginError}=await sb.auth.signInWithPassword({email:SUPER_EMAIL,password});
+    if(loginError){$("#activateMsg").textContent=loginError.message;return}
+    $("#activateMsg").textContent="تم التفعيل. جاري فتح اللوحة...";
+    await boot();
+  }catch(err){
+    $("#activateMsg").textContent=err.message||"تعذر تفعيل الحساب";
+  }
 });
 $("#logoutBtn").onclick=async()=>{await sb.auth.signOut();location.reload()};
 $("#passwordBtn").onclick=()=>$("#passwordModal").classList.add("open");
