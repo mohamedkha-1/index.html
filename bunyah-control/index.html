@@ -142,6 +142,11 @@ const categoryNames={general:"عام",contact:"التواصل",social:"المن�
 let session=null, profile=null, requestsCache=[], settingsCache=[], contentCache=[];
 
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
+async function adminAction(action,payload={}){
+  const {data,error}=await sb.functions.invoke("cms-admin",{body:{action,...payload}});
+  if(error||data?.error)throw new Error(data?.error||error?.message||"تعذر تنفيذ العملية");
+  return data;
+}
 function fmtDate(v){if(!v)return"—";return new Intl.DateTimeFormat("ar-SA",{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Riyadh"}).format(new Date(v))}
 function today(){return new Intl.DateTimeFormat("ar-SA",{dateStyle:"full",timeStyle:"short",timeZone:"Asia/Riyadh"}).format(new Date())}
 function canSettings(cat){
@@ -285,8 +290,8 @@ async function openRequest(id){
   </div>`;
   $("#requestModal").classList.add("open");
   $$("[data-file-path]",$("#requestDetails")).forEach(b=>b.onclick=async()=>{const {data,error}=await sb.storage.from("bunyah-request-files").createSignedUrl(b.dataset.filePath,300);if(error)toast(error.message);else window.open(data.signedUrl,"_blank")});
-  $("#saveRequestBtn").onclick=async()=>{const status=$("#modalStatus").value,patch={status};if(status==="contacted"&&!r.contacted_at)patch.contacted_at=new Date().toISOString();if(["won","closed","not_qualified"].includes(status))patch.closed_at=new Date().toISOString();const {error}=await sb.from("project_requests").update(patch).eq("id",id);if(error)toast(error.message);else{toast("تم حفظ الحالة");$("#requestModal").classList.remove("open");await Promise.all([loadRequests(),loadDashboard()])}};
-  $("#addNoteBtn").onclick=async()=>{const body=$("#newNote").value.trim();if(!body)return;const {error}=await sb.from("request_notes").insert({request_id:id,body,created_by:profile.user_id});if(error)toast(error.message);else{toast("تمت إضافة الملاحظة");openRequest(id)}};
+  $("#saveRequestBtn").onclick=async()=>{try{await adminAction("update_request",{id,status:$("#modalStatus").value});toast("تم حفظ حالة الطلب");$("#requestModal").classList.remove("open");await Promise.all([loadRequests(),loadDashboard()])}catch(err){toast(err.message)}};
+  $("#addNoteBtn").onclick=async()=>{const body=$("#newNote").value.trim();if(!body)return;try{await adminAction("add_note",{request_id:id,body});toast("تمت إضافة الملاحظة");openRequest(id)}catch(err){toast(err.message)}};
 }
 $("#exportBtn").onclick=()=>{
   if(!requestsCache.length){toast("لا توجد بيانات للتصدير");return}
@@ -317,18 +322,25 @@ function renderContent(){
 }
 $("#contentSectionFilter").onchange=renderContent;
 async function saveContent(key){
-  const input=$(`[data-content-input="${CSS.escape(key)}"]`);const {error}=await sb.from("cms_content").update({value:input.value,updated_by:profile.user_id}).eq("key",key);if(error)toast(error.message);else{toast("تم حفظ المحتوى");const x=contentCache.find(x=>x.key===key);if(x)x.value=input.value;renderContent()}
+  const input=$(`[data-content-input="${CSS.escape(key)}"]`);if(!input)return;
+  try{
+    const out=await adminAction("update_content",{key,value:input.value});
+    const x=contentCache.find(x=>x.key===key);if(x)x.value=out.row.value;
+    toast("تم الحفظ ونشر التغيير على الموقع");
+    renderContent();
+  }catch(err){toast(err.message)}
 }
 async function uploadContentImage(key,file){
   if(file.size>15*1024*1024){toast("الحد الأقصى 15MB");return}
-  const ext=(file.name.split(".").pop()||"jpg").toLowerCase(),path=`cms/${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}.${ext}`;
-  const {error:upErr}=await sb.storage.from("bunyah-site-media").upload(path,file,{contentType:file.type,upsert:false});if(upErr){toast(upErr.message);return}
-  const {data:urlData}=sb.storage.from("bunyah-site-media").getPublicUrl(path);
-  const public_url=urlData.publicUrl;
-  await sb.from("media_assets").insert({name:file.name,storage_path:path,public_url,alt_text:"",mime_type:file.type,size_bytes:file.size,created_by:profile.user_id});
-  const {error}=await sb.from("cms_content").update({value:public_url,updated_by:profile.user_id}).eq("key",key);
-  if(error){toast(error.message);return}
-  const x=contentCache.find(x=>x.key===key);if(x)x.value=public_url;toast("تم رفع الصورة واستبدالها");renderContent();
+  try{
+    const signed=await adminAction("media_upload_url",{name:file.name,mime:file.type,size:file.size});
+    const {error:upErr}=await sb.storage.from("bunyah-site-media").uploadToSignedUrl(signed.path,signed.token,file,{contentType:file.type});if(upErr)throw upErr;
+    const {data:urlData}=sb.storage.from("bunyah-site-media").getPublicUrl(signed.path);
+    await adminAction("register_media",{name:file.name,storage_path:signed.path,public_url:urlData.publicUrl,alt_text:"",mime_type:file.type,size_bytes:file.size});
+    const out=await adminAction("update_content",{key,value:urlData.publicUrl});
+    const x=contentCache.find(x=>x.key===key);if(x)x.value=out.row.value;
+    toast("تم رفع الصورة ونشرها على الموقع");renderContent();
+  }catch(err){toast(err.message)}
 }
 
 async function loadSettings(){
@@ -343,22 +355,28 @@ function renderSettingsGroup(id,cats){
 }
 async function saveSetting(key){
   const row=settingsCache.find(x=>x.key===key);if(!row||!canSettings(row.category))return;
-  const input=$(`[data-setting-input="${CSS.escape(key)}"]`);const {error}=await sb.from("cms_settings").update({value:input.value,updated_by:profile.user_id}).eq("key",key);if(error)toast(error.message);else{row.value=input.value;toast("تم حفظ الإعداد")}
+  const input=$(`[data-setting-input="${CSS.escape(key)}"]`);
+  try{
+    const out=await adminAction("update_setting",{key,value:input.value});
+    row.value=out.row.value;toast("تم حفظ الإعداد وتفعيله");
+  }catch(err){toast(err.message)}
 }
 
 async function loadMedia(){
   const {data,error}=await sb.from("media_assets").select("*").order("created_at",{ascending:false}).limit(200);if(error){toast(error.message);return}
   $("#mediaGrid").innerHTML=(data||[]).map(m=>`<div class="media"><img src="${esc(m.public_url)}" alt="${esc(m.alt_text||"")}"><div class="media-body"><b>${esc(m.name)}</b><div class="media-actions"><button class="btn" data-copy-url="${esc(m.public_url)}">نسخ الرابط</button><button class="btn danger" data-delete-media="${m.id}" data-path="${esc(m.storage_path)}">حذف</button></div></div></div>`).join("")||'<div class="empty">لا توجد صور مرفوعة</div>';
   $$$("[data-copy-url]").forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copyUrl);toast("تم نسخ الرابط")});
-  $$$("[data-delete-media]").forEach(b=>b.onclick=async()=>{if(!confirm("حذف الصورة؟"))return;await sb.storage.from("bunyah-site-media").remove([b.dataset.path]);const {error}=await sb.from("media_assets").delete().eq("id",b.dataset.deleteMedia);if(error)toast(error.message);else{toast("تم الحذف");loadMedia()}});
+  $$("[data-delete-media]").forEach(b=>b.onclick=async()=>{if(!confirm("حذف الصورة؟"))return;try{await adminAction("delete_media",{id:b.dataset.deleteMedia});toast("تم الحذف");loadMedia()}catch(err){toast(err.message)}});
 }
 $("#mediaUploadBtn").onclick=async()=>{
   const file=$("#mediaFile").files[0];if(!file){toast("اختر صورة");return}if(file.size>15*1024*1024){toast("الحد الأقصى 15MB");return}
-  const ext=(file.name.split(".").pop()||"jpg").toLowerCase(),path=`${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}.${ext}`;
-  const {error:upErr}=await sb.storage.from("bunyah-site-media").upload(path,file,{contentType:file.type,upsert:false});if(upErr){toast(upErr.message);return}
-  const {data:urlData}=sb.storage.from("bunyah-site-media").getPublicUrl(path);
-  const {error}=await sb.from("media_assets").insert({name:file.name,storage_path:path,public_url:urlData.publicUrl,alt_text:$("#mediaAlt").value.trim(),mime_type:file.type,size_bytes:file.size,created_by:profile.user_id});
-  if(error)toast(error.message);else{$("#mediaFile").value="";$("#mediaAlt").value="";toast("تم رفع الصورة");loadMedia()}
+  try{
+    const signed=await adminAction("media_upload_url",{name:file.name,mime:file.type,size:file.size});
+    const {error:upErr}=await sb.storage.from("bunyah-site-media").uploadToSignedUrl(signed.path,signed.token,file,{contentType:file.type});if(upErr)throw upErr;
+    const {data:urlData}=sb.storage.from("bunyah-site-media").getPublicUrl(signed.path);
+    await adminAction("register_media",{name:file.name,storage_path:signed.path,public_url:urlData.publicUrl,alt_text:$("#mediaAlt").value.trim(),mime_type:file.type,size_bytes:file.size});
+    $("#mediaFile").value="";$("#mediaAlt").value="";toast("تم رفع الصورة");loadMedia();
+  }catch(err){toast(err.message)}
 };
 
 async function loadUsers(){
