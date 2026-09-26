@@ -1,0 +1,23 @@
+name: Export latest source
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/export-latest-source.yml"
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare source package
+        run: |
+          mkdir -p export
+          rsync -a --exclude='.git' --exclude='export' ./ export/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bunyah-source-latest
+          path: export/
+          if-no-files-found: error
+          retention-days: 7
