@@ -208,7 +208,7 @@ $("#savePasswordBtn").onclick=async()=>{
   const p=$("#newPassword").value;if(p.length<10){toast("استخدم 10 أحرف على الأقل");return}
   const {error}=await sb.auth.updateUser({password:p});if(error)toast(error.message);else{toast("تم تغيير كلمة المرور");$("#passwordModal").classList.remove("open");$("#newPassword").value=""}
 };
-$$$("[data-close]").forEach(b=>b.onclick=()=>$("#"+b.dataset.close).classList.remove("open"));
+$("[data-close]").forEach(b=>b.onclick=()=>$("#"+b.dataset.close).classList.remove("open"));
 
 async function boot(){
   const {data}=await sb.auth.getSession();session=data.session;
@@ -216,14 +216,14 @@ async function boot(){
   const {data:p,error}=await sb.from("admin_profiles").select("*").eq("user_id",session.user.id).maybeSingle();
   if(error||!p||!p.active){await sb.auth.signOut();showLogin();$("#loginMsg").textContent="هذا الحساب غير مخول للوصول إلى لوحة بُنية.";return}
   profile=p;showApp();$("#roleBadge").textContent=roleNames[p.role]||p.role;$("#userEmail").textContent=p.email;$("#userRole").textContent=roleNames[p.role]||p.role;$("#todayText").textContent=today();
-  $$$("[data-roles]").forEach(el=>el.classList.toggle("hidden",!el.dataset.roles.split(",").includes(p.role)));
+  $("[data-roles]").forEach(el=>el.classList.toggle("hidden",!el.dataset.roles.split(",").includes(p.role)));
   wireNav();await Promise.all([loadDashboard(),loadSettings(),loadContent()]);
   if(location.hash.includes("type=recovery")||location.hash.includes("type=invite"))$("#passwordModal").classList.add("open");
 }
 
 function wireNav(){
   $$("#nav button").forEach(btn=>btn.onclick=()=>openView(btn.dataset.view));
-  $$$("[data-go]").forEach(btn=>btn.onclick=()=>openView(btn.dataset.go));
+  $("[data-go]").forEach(btn=>btn.onclick=()=>openView(btn.dataset.go));
 }
 async function openView(name){
   $$(".view").forEach(v=>v.classList.remove("active"));$("#view-"+name)?.classList.add("active");
@@ -266,7 +266,7 @@ async function loadRequests(){
 }
 function renderRequests(){
   $("#requestsBody").innerHTML=requestsCache.map(r=>`<tr><td>${fmtDate(r.created_at)}</td><td>${esc(r.name)}</td><td dir="ltr">${esc(r.phone)}</td><td>${esc(r.project_type||"—")}</td><td>${esc(r.city||"—")}</td><td><span class="pill ${esc(r.status)}">${statusNames[r.status]||r.status}</span></td><td><button class="btn" data-open-request="${r.id}">فتح</button></td></tr>`).join("")||'<tr><td colspan="7" class="empty">لا توجد نتائج</td></tr>';
-  $$$("[data-open-request]").forEach(b=>b.onclick=()=>openRequest(b.dataset.openRequest));
+  $("[data-open-request]").forEach(b=>b.onclick=()=>openRequest(b.dataset.openRequest));
 }
 $("#requestFilterBtn").onclick=loadRequests;
 async function openRequest(id){
@@ -365,7 +365,7 @@ async function saveSetting(key){
 async function loadMedia(){
   const {data,error}=await sb.from("media_assets").select("*").order("created_at",{ascending:false}).limit(200);if(error){toast(error.message);return}
   $("#mediaGrid").innerHTML=(data||[]).map(m=>`<div class="media"><img src="${esc(m.public_url)}" alt="${esc(m.alt_text||"")}"><div class="media-body"><b>${esc(m.name)}</b><div class="media-actions"><button class="btn" data-copy-url="${esc(m.public_url)}">نسخ الرابط</button><button class="btn danger" data-delete-media="${m.id}" data-path="${esc(m.storage_path)}">حذف</button></div></div></div>`).join("")||'<div class="empty">لا توجد صور مرفوعة</div>';
-  $$$("[data-copy-url]").forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copyUrl);toast("تم نسخ الرابط")});
+  $("[data-copy-url]").forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copyUrl);toast("تم نسخ الرابط")});
   $$("[data-delete-media]").forEach(b=>b.onclick=async()=>{if(!confirm("حذف الصورة؟"))return;try{await adminAction("delete_media",{id:b.dataset.deleteMedia});toast("تم الحذف");loadMedia()}catch(err){toast(err.message)}});
 }
 $("#mediaUploadBtn").onclick=async()=>{
@@ -383,9 +383,9 @@ async function loadUsers(){
   if(profile.role!=="super_admin")return;
   const {data,error}=await sb.from("admin_profiles").select("*").order("created_at");if(error){toast(error.message);return}
   $("#usersBody").innerHTML=(data||[]).map(u=>`<tr><td>${esc(u.email)}</td><td>${esc(u.full_name||"—")}</td><td><select class="control" data-user-role="${u.user_id}" ${u.email.toLowerCase()===SUPER_EMAIL.toLowerCase()?"disabled":""}>${Object.entries(roleNames).map(([k,v])=>`<option value="${k}" ${k===u.role?"selected":""} ${k==="super_admin"&&u.email.toLowerCase()!==SUPER_EMAIL.toLowerCase()?"disabled":""}>${v}</option>`).join("")}</select></td><td>${u.active?'<span class="ok-text">نشط</span>':'<span class="danger-text">موقوف</span>'}</td><td>${fmtDate(u.created_at)}</td><td>${u.email.toLowerCase()===SUPER_EMAIL.toLowerCase()?'<span class="muted">الحساب الأساسي</span>':`<button class="btn" data-user-toggle="${u.user_id}" data-active="${u.active}">${u.active?"تعطيل":"تفعيل"}</button> <button class="btn danger" data-user-delete="${u.user_id}">حذف</button>`}</td></tr>`).join("");
-  $$$("[data-user-role]").forEach(s=>s.onchange=()=>userAction({action:"set_role",user_id:s.dataset.userRole,role:s.value}));
-  $$$("[data-user-toggle]").forEach(b=>b.onclick=()=>userAction({action:b.dataset.active==="true"?"disable":"enable",user_id:b.dataset.userToggle}));
-  $$$("[data-user-delete]").forEach(b=>b.onclick=()=>{if(confirm("حذف هذا المستخدم نهائيًا؟"))userAction({action:"delete",user_id:b.dataset.userDelete})});
+  $("[data-user-role]").forEach(s=>s.onchange=()=>userAction({action:"set_role",user_id:s.dataset.userRole,role:s.value}));
+  $("[data-user-toggle]").forEach(b=>b.onclick=()=>userAction({action:b.dataset.active==="true"?"disable":"enable",user_id:b.dataset.userToggle}));
+  $("[data-user-delete]").forEach(b=>b.onclick=()=>{if(confirm("حذف هذا المستخدم نهائيًا؟"))userAction({action:"delete",user_id:b.dataset.userDelete})});
 }
 $("#inviteBtn").onclick=async()=>{const email=$("#inviteEmail").value.trim(),full_name=$("#inviteName").value.trim(),role=$("#inviteRole").value,password=$("#invitePassword").value;if(!email){toast("أدخل البريد");return}if(password.length<10){toast("كلمة المرور المؤقتة يجب أن تكون 10 أحرف على الأقل");return}await userAction({action:"create",email,full_name,role,password});$("#inviteEmail").value="";$("#inviteName").value="";$("#invitePassword").value=""};
 async function userAction(body){const {data,error}=await sb.functions.invoke("admin-users",{body});if(error||data?.error){toast(data?.error||error.message);return}toast(body.action==="create"?"تم إنشاء الحساب":"تم تنفيذ الإجراء");loadUsers()}
