@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>بُنية | تنفيذ المشاريع من المخطط إلى التشغيل في الرياض</title><meta content="بُنية شركة تنفيذ وإنشاءات في الرياض. ندير تنفيذ المشاريع التجارية والسكنية من مراجعة المخططات وتنسيق الأعمال الفنية إلى التشطيبات والتجهيز والتسليم." name="description"/><meta content="#141414" name="theme-color"/><meta content="بُنية — من المخطط إلى التشغيل" property="og:title"/><meta content="تنفيذ المشاريع النوعية من المخططات والأعمال الفنية حتى التشغيل." property="og:description"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/><style>
+<html dir="rtl" lang="ar"><head><!-- partners-live-cache-v48 --><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>بُنية | تنفيذ المشاريع من المخطط إلى التشغيل في الرياض</title><meta content="بُنية شركة تنفيذ وإنشاءات في الرياض. ندير تنفيذ المشاريع التجارية والسكنية من مراجعة المخططات وتنسيق الأعمال الفنية إلى التشطيبات والتجهيز والتسليم." name="description"/><meta content="#141414" name="theme-color"/><meta content="بُنية — من المخطط إلى التشغيل" property="og:title"/><meta content="تنفيذ المشاريع النوعية من المخططات والأعمال الفنية حتى التشغيل." property="og:description"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/><style>
     :root{
       --bg:#141414;--bg2:#141414;--surface:#1A1A1A;--surface2:#242424;
       --wine:#4C0B25;--wine2:#703B51;--wine3:#C1B8AD;--cream:#E5E4E3;--sand:#C1B8AD;
@@ -749,4 +749,12 @@ if(strip)counterObserver.observe(strip);
 <script>
 (()=>{const gallery=document.querySelector('[data-sanmarzano-gallery]');if(!gallery)return;const slides=[...gallery.querySelectorAll('.sanmarzano-slide')],dots=[...gallery.querySelectorAll('.alzahi-dots button')],state=gallery.querySelector('[data-sanmarzano-state]');let i=0,timer=null,visible=false;const labels=['المساحة الرئيسية','تفاصيل التشطيبات','التجهيز التشغيلي','تفاصيل الضيافة','تفاصيل الجلسات','منطقة البار','الواجهة'];function show(n){i=(n+slides.length)%slides.length;slides.forEach((el,k)=>el.classList.toggle('active',k===i));dots.forEach((el,k)=>el.classList.toggle('active',k===i));if(state)state.textContent=labels[i]}function stop(){if(timer){clearInterval(timer);timer=null}}function play(){stop();if(!visible||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;timer=setInterval(()=>show(i+1),3600)}dots.forEach((d,k)=>d.addEventListener('click',()=>{show(k);play()}));gallery.addEventListener('mouseenter',stop);gallery.addEventListener('mouseleave',play);gallery.addEventListener('focusin',stop);gallery.addEventListener('focusout',play);new IntersectionObserver(es=>es.forEach(e=>{visible=e.isIntersecting&&e.intersectionRatio>.25;visible?play():stop()}),{threshold:[0,.25,.6]}).observe(gallery);show(0)})();
 </script>
-</body></html>
+<script id="partners-live-guard-v48">
+document.addEventListener("DOMContentLoaded",function(){
+  const clients=document.querySelector(".clients");
+  if(!clients) return;
+  if(clients.querySelector(".partner-marquee")){
+    clients.querySelectorAll(".partner-grid").forEach(el=>el.remove());
+  }
+});
+</script></body></html>
