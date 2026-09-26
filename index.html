@@ -836,6 +836,168 @@ footer .brand-logo{width:108px}
     min-height:0!important;
   }
 }
+</style><style id="journal-unified-layout-v1">
+/* Unified journal cards — equal structure without cropping source images */
+.journal{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:20px!important;
+  align-items:stretch!important;
+}
+.journal .article,
+.journal .article.big,
+.journal .fitout-feature,
+.journal .duration-feature,
+.journal .pricing-files-feature{
+  display:grid!important;
+  grid-template-rows:300px 1fr!important;
+  height:100%!important;
+  min-height:650px!important;
+  align-self:stretch!important;
+  border-radius:26px!important;
+  overflow:hidden!important;
+}
+.journal .article .article-img,
+.journal .article.big .article-img,
+.journal .fitout-full-image,
+.journal .duration-full-image,
+.journal .pricing-files-image{
+  width:100%!important;
+  height:300px!important;
+  min-height:300px!important;
+  aspect-ratio:auto!important;
+  margin:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  background:#F3EEE9!important;
+}
+.journal .article .article-img img,
+.journal .article.big .article-img img,
+.journal .fitout-full-image img,
+.journal .duration-full-image img,
+.journal .pricing-files-image img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  transform:none!important;
+}
+.journal .article:hover .article-img img{
+  transform:scale(1.015)!important;
+}
+.journal .article .article-body,
+.journal .article.big .article-body,
+.journal .fitout-feature .article-body,
+.journal .duration-feature .article-body,
+.journal .pricing-files-feature .article-body{
+  display:flex!important;
+  flex-direction:column!important;
+  position:static!important;
+  height:auto!important;
+  min-height:350px!important;
+  margin:0!important;
+  padding:30px 30px 28px!important;
+  direction:rtl!important;
+  text-align:right!important;
+}
+.journal .article .article-body>span:first-child{
+  display:block!important;
+  position:static!important;
+  margin:0 0 14px!important;
+  padding:0!important;
+  font-size:10px!important;
+  line-height:1.5!important;
+  letter-spacing:.04em!important;
+}
+.journal .article .article-body h3,
+.journal .article.big .article-body h3{
+  position:static!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0 0 14px!important;
+  padding:0!important;
+  font-size:clamp(25px,2vw,34px)!important;
+  line-height:1.35!important;
+  letter-spacing:-.025em!important;
+}
+.journal .article .article-body p,
+.journal .article.big .article-body p{
+  position:static!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  color:#776C6F!important;
+  font-size:14px!important;
+  line-height:1.9!important;
+}
+.journal .article .article-body .read{
+  display:block!important;
+  position:static!important;
+  width:100%!important;
+  margin:auto 0 0!important;
+  padding-top:24px!important;
+  text-align:left!important;
+  white-space:nowrap!important;
+  line-height:1.4!important;
+}
+@media(max-width:980px){
+  .journal{
+    grid-template-columns:1fr!important;
+    gap:18px!important;
+  }
+  .journal .article,
+  .journal .article.big,
+  .journal .fitout-feature,
+  .journal .duration-feature,
+  .journal .pricing-files-feature{
+    grid-template-rows:auto auto!important;
+    min-height:0!important;
+  }
+  .journal .article .article-img,
+  .journal .article.big .article-img,
+  .journal .fitout-full-image,
+  .journal .duration-full-image,
+  .journal .pricing-files-image{
+    height:auto!important;
+    min-height:0!important;
+    aspect-ratio:16/10!important;
+  }
+  .journal .article .article-body,
+  .journal .article.big .article-body,
+  .journal .fitout-feature .article-body,
+  .journal .duration-feature .article-body,
+  .journal .pricing-files-feature .article-body{
+    min-height:300px!important;
+    padding:26px 24px 24px!important;
+  }
+}
+@media(max-width:600px){
+  .journal .article .article-img,
+  .journal .article.big .article-img,
+  .journal .fitout-full-image,
+  .journal .duration-full-image,
+  .journal .pricing-files-image{
+    aspect-ratio:4/3!important;
+  }
+  .journal .article .article-body,
+  .journal .article.big .article-body,
+  .journal .fitout-feature .article-body,
+  .journal .duration-feature .article-body,
+  .journal .pricing-files-feature .article-body{
+    min-height:280px!important;
+    padding:23px 20px 22px!important;
+  }
+  .journal .article .article-body h3,
+  .journal .article.big .article-body h3{
+    font-size:26px!important;
+  }
+}
 </style></head><body><nav class="nav" id="nav"><div class="wrap navin"><div class="brand"><img class="brand-logo" src="https://d2ol7oe51mr4n9.cloudfront.net/user_3HBPmZt3l78Cs2wbn6HfhyTxhWQ/73e15d29-90a6-4eae-af05-046c29e30023.png" alt="بُنية"/></div><div class="links"><a href="#services">خدماتنا</a><a href="#projects">مشاريعنا</a><a href="#reality">آلية التنفيذ</a><a href="#journey">رحلة المشروع</a><a href="#knowledge">المعرفة</a><a href="#contact">تواصل معنا</a></div><div class="nav-actions"><a class="btn ghost" href="#projects">استعرض مشاريعنا</a><a class="btn primary" href="#contact">ابدأ مشروعك</a><button class="mobile-menu-btn" type="button" aria-label="فتح القائمة" aria-expanded="false" aria-controls="mobileMenu"><span></span><span></span><span></span></button></div></div></nav><div class="mobile-menu" id="mobileMenu" aria-label="القائمة الرئيسية"><a href="#services">خدماتنا</a><a href="#projects">مشاريعنا</a><a href="#reality">آلية التنفيذ</a><a href="#journey">رحلة المشروع</a><a href="#knowledge">المعرفة</a><a href="#contact">تواصل معنا</a></div><header class="hero"><div class="hero-lines"><i></i><i></i><i></i></div><div class="wrap hero-layout"><div class="hero-copy reveal"><span class="ey light">BUNYAH — PROJECT EXECUTION / RIYADH</span><h1>من المخطط<span>إلى مساحة جاهزة للتشغيل.</span></h1><p>بُنية شركة تنفيذ وإنشاءات في الرياض. ندير تنفيذ المشاريع التجارية والسكنية من مراجعة المخططات وتنسيق الأعمال الفنية إلى التشطيبات والتجهيز والتسليم.</p><p>نستلم نطاق التنفيذ كمسار واحد واضح، لتقليل تعدد الجهات وتسهيل المتابعة واتخاذ القرار من البداية حتى التسليم.</p><div class="hero-actions"><a class="btn primary" href="#contact">أرسل مشروعك للمراجعة</a><a class="btn ghost" href="#projects">استعرض مشاريعنا</a></div><div class="hero-proof"><span class="proof-pill">إنشاءات</span><span class="proof-pill">Fit-Out</span><span class="proof-pill">MEP</span><span class="proof-pill">تشطيبات</span><span class="proof-pill">ترميم</span><span class="proof-pill">أعمال خاصة</span><span class="proof-pill">تجهيز</span></div></div><div class="review-card reveal" id="reviewCard"><div class="review-top"><div class="review-title"><b>مراجعة مشروعك</b><small>من الملفات إلى قرار تنفيذي واضح</small></div><div class="review-status"><i></i><span>جاهز للمراجعة</span></div></div><div class="review-grid"><div class="review-steps"><div class="review-step active" data-review="0"><b>01 — المخطط</b><small>نفهم النطاق والتفاصيل</small></div><div class="review-step" data-review="1"><b>02 — التصور</b><small>نراجع التصميم والخامات</small></div><div class="review-step" data-review="2"><b>03 — التنفيذ</b><small>ننسق الأعمال في الموقع</small></div><div class="review-step" data-review="3"><b>04 — التسليم</b><small>جاهز للاستخدام</small></div></div><div class="review-visual"><div class="review-frame active"><img class="review-plan" alt="المخطط الفني للمشروع" src="assets/review/01-plan.png"/><span class="frame-label">TECHNICAL PLAN</span></div><div class="review-frame"><img alt="التصور ثلاثي الأبعاد للمشروع" src="assets/review/02-concept.png"/><span class="frame-label">3D / DESIGN REVIEW</span></div><div class="review-frame"><img alt="المشروع أثناء التنفيذ في الموقع" src="assets/review/03-onsite.png"/><span class="frame-label">ON SITE</span></div><div class="review-frame"><img alt="المشروع بعد التسليم" src="assets/review/04-delivery.png"/><span class="frame-label">FINAL SPACE</span></div></div></div><div class="review-footer"><small id="reviewText">نراجع المشروع قبل التسعير حتى يكون نطاق التنفيذ واضحًا من البداية.</small><div class="dots"><span class="active"></span><span></span><span></span><span></span></div></div></div></div></header><section class="trust-strip"><div class="wrap trust-grid"><div class="trust-item"><strong><span data-count="14">0</span><small class="metric-unit">+</small></strong><span>مشروع نوعي ضمن نطاقات تنفيذ مختلفة</span></div><div class="trust-item"><strong><span data-comma="1" data-count="3300">0</span><small class="metric-unit">+</small></strong><span>م² مساحات منفذة ومجهزة</span></div><div class="trust-item"><strong><span data-count="90">0</span></strong><span>يوم متوسط مدة التنفيذ</span></div><div class="trust-item"><strong><span data-count="1">0</span><small class="metric-unit">سنة</small></strong><span>ضمان على الأعمال المنفذة</span></div><p class="metric-note" style="margin:18px 0 0;color:#8A7A7F;font-size:11px;line-height:1.8;text-align:center">تختلف مدة التنفيذ بحسب مساحة المشروع ونطاق الأعمال والاعتمادات والمشتريات.</p></div></section><main><section class="section services" id="services"><div class="wrap"><div class="section-title reveal"><div><span class="ey light">01 — CAPABILITIES</span><h2>تنفيذ المشروع كمنظومة واحدة.</h2></div><p>ندير الأعمال الإنشائية والفنية والتشطيبات والتجهيز ضمن نطاق مترابط ومسؤوليات واضحة، حتى يكون التنفيذ أسهل في المتابعة وأكثر دقة في التسليم.</p></div><div class="services-grid"><article class="service-card reveal"><span class="service-num">01 / التنفيذ الشامل</span><h3>من العظم إلى مساحة جاهزة للتشغيل</h3><p>من مرحلة العظم أو الموقع القائم حتى المساحة النهائية، بما يشمل الأعمال الإنشائية والتقسيمات والأسقف والأرضيات والجدران والدهانات والواجهات والتجهيز النهائي بحسب نطاق المشروع.</p><div class="tags"><span>#إنشاءات</span><span>#Fit-Out</span><span>#تجهيز</span></div><span class="service-icon">⌂</span></article><article class="service-card reveal"><span class="service-num">02 / الأعمال الفنية MEP</span><h3>تنسيق الأعمال الفنية قبل ظهور التعارض</h3><p>تنفيذ وتنسيق الكهرباء والتكييف والسباكة والصرف والإنارة، مع مراجعة نقاط الالتقاء بين التخصصات قبل وأثناء التنفيذ.</p><div class="tags"><span>#MEP</span><span>#كهرباء</span><span>#تكييف</span><span>#سباكة</span></div><span class="service-icon">⌗</span></article><article class="service-card reveal"><span class="service-num">03 / التشطيبات</span><h3>تنفيذ التفاصيل والمواد المعتمدة</h3><p>تنفيذ المواد والتفاصيل المعتمدة في التصميم بما يشمل الأرضيات والأسقف والجدران والدهانات والكسوات والواجهات والعناصر النهائية.</p><div class="tags"><span>#تشطيبات</span><span>#أرضيات</span><span>#أسقف</span><span>#واجهات</span></div><span class="service-icon">▦</span></article><article class="service-card reveal"><span class="service-num">04 / الأعمال الخاصة</span><h3>تفاصيل مخصصة للمشروع</h3><p>تنفيذ الكاونترات والنجارة والأثاث التفصيلي والمطابخ والعناصر المخصصة التي تتطلب تصنيعًا أو معالجة تنفيذية خاصة.</p><div class="tags"><span>#نجارة</span><span>#أثاث</span><span>#تفصيل</span><span>#مطابخ</span></div><span class="service-icon">◇</span></article><article class="service-card reveal"><span class="service-num">05 / التجديد والترميم</span><h3>إعادة تأهيل الموقع حتى الاستخدام</h3><p>إعادة تأهيل المواقع القائمة من الإزالة والمعالجة وتحديث الخدمات، حتى التشطيبات وإعادة تجهيز المساحة للاستخدام.</p><div class="tags"><span>#ترميم</span><span>#تجديد</span><span>#إعادة_تأهيل</span></div><span class="service-icon">↺</span></article></div><p class="services-cta" style="margin:22px 0 0;color:#D8C8CD;font-size:14px;font-weight:700;text-align:center">لديك نطاق مختلف؟ أرسل المخططات، ونحدد ما يمكن لبُنية استلامه وتنفيذه.</p></div></section><section class="section projects" id="projects"><div class="wrap"><div class="section-title reveal"><div><span class="ey">02 — SELECTED PROJECTS</span><h2>المشروع المنفذ هو أوضح تعريف لقدرتنا.</h2></div><p>نعرض المشاريع من زاوية التنفيذ: المساحة، نطاق العمل، الأعمال المنفذة، والنتيجة التي تم تسليمها.</p></div><div class="project-grid"><article class="project-card reveal"><div class="project-image alzahi-gallery" data-alzahi-gallery>
 <img class="alzahi-slide active" alt="فيلا الزاهي أثناء أعمال إعادة التأهيل" src="assets/projects/alzahi/01-during.jpg" loading="lazy"/>
 <img class="alzahi-slide" alt="فيلا الزاهي أثناء أعمال الترميم" src="assets/projects/alzahi/02-during.jpg" loading="lazy"/>
