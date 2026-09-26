@@ -1,0 +1,111 @@
+name: Fix process caption overlap
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/fix-process-caption.yml"
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Fix process caption layout
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          css=r'''
+          <style id="process-caption-fix-v2">
+          #reality .p-caption{
+            display:flex!important;
+            flex-direction:row!important;
+            align-items:flex-end!important;
+            justify-content:space-between!important;
+            gap:28px!important;
+            direction:rtl!important;
+            box-sizing:border-box!important;
+          }
+          #reality .p-caption>div{
+            flex:1 1 auto!important;
+            min-width:0!important;
+            max-width:calc(100% - 92px)!important;
+            display:flex!important;
+            flex-direction:column!important;
+            align-items:flex-start!important;
+            justify-content:flex-end!important;
+            gap:7px!important;
+            text-align:right!important;
+          }
+          #reality .p-caption b{
+            position:static!important;
+            inset:auto!important;
+            display:block!important;
+            width:100%!important;
+            margin:0!important;
+            padding:0!important;
+            font-size:clamp(26px,2.6vw,42px)!important;
+            line-height:1.12!important;
+            white-space:normal!important;
+            overflow:visible!important;
+            text-overflow:clip!important;
+          }
+          #reality .p-caption small{
+            position:static!important;
+            inset:auto!important;
+            display:block!important;
+            width:100%!important;
+            max-width:680px!important;
+            margin:0!important;
+            padding:0!important;
+            font-size:clamp(13px,1.15vw,18px)!important;
+            line-height:1.7!important;
+            white-space:normal!important;
+            overflow:visible!important;
+            text-overflow:clip!important;
+            color:rgba(255,255,255,.78)!important;
+          }
+          #reality .p-caption .progress{
+            position:static!important;
+            inset:auto!important;
+            flex:0 0 auto!important;
+            min-width:64px!important;
+            margin:0!important;
+            padding:0 0 2px!important;
+            white-space:nowrap!important;
+            align-self:flex-end!important;
+            direction:ltr!important;
+          }
+          @media(max-width:700px){
+            #reality .p-caption{
+              gap:14px!important;
+              padding-inline:18px!important;
+              padding-bottom:18px!important;
+            }
+            #reality .p-caption>div{max-width:calc(100% - 58px)!important;gap:5px!important}
+            #reality .p-caption b{font-size:clamp(21px,6vw,29px)!important;line-height:1.15!important}
+            #reality .p-caption small{font-size:12px!important;line-height:1.55!important}
+            #reality .p-caption .progress{min-width:46px!important;font-size:11px!important}
+          }
+          </style>
+          '''
+          if 'id="process-caption-fix-v2"' in s:
+              s=re.sub(r'<style id="process-caption-fix-v2">.*?</style>',css.strip(),s,flags=re.S)
+          else:
+              s=s.replace('</head>',css+'</head>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Remove temporary workflow
+        run: rm -f .github/workflows/fix-process-caption.yml
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/fix-process-caption.yml
+          git commit -m "Fix overlapping process captions"
+          git push
