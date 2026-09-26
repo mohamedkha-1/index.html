@@ -282,12 +282,34 @@ async function loadContent(){
 }
 function renderContent(){
   const sec=$("#contentSectionFilter").value;const rows=contentCache.filter(x=>!sec||x.section===sec);
-  $("#contentList").innerHTML=rows.map(x=>`<div class="content-row"><div class="meta"><b>${esc(x.label)}</b><small>${esc(x.section)} · ${esc(x.key)}</small></div><div>${x.content_type==="textarea"?`<textarea data-content-input="${esc(x.key)}">${esc(x.value)}</textarea>`:`<input data-content-input="${esc(x.key)}" value="${esc(x.value)}">`}</div><button class="btn" data-save-content="${esc(x.key)}">حفظ</button></div>`).join("")||'<div class="empty">لا يوجد محتوى</div>';
-  $$("[data-save-content]").forEach(b=>b.onclick=()=>saveContent(b.dataset.saveContent));
+  $("#contentList").innerHTML=rows.map(x=>{
+    const editor=x.content_type==="textarea"
+      ?`<textarea data-content-input="${esc(x.key)}">${esc(x.value)}</textarea>`
+      :x.content_type==="image_url"
+        ?`<div style="display:grid;grid-template-columns:92px 1fr auto;gap:8px;align-items:center"><img src="${esc(x.value)}" alt="" style="width:92px;height:64px;object-fit:cover;border-radius:8px;background:#0b090a"><input data-content-input="${esc(x.key)}" value="${esc(x.value)}"><input type="file" accept="image/*" hidden data-content-file="${esc(x.key)}"><button class="btn" type="button" data-pick-content-image="${esc(x.key)}">رفع صورة</button></div>`
+        :`<input data-content-input="${esc(x.key)}" value="${esc(x.value)}">`;
+    return `<div class="content-row"><div class="meta"><b>${esc(x.label)}</b><small>${esc(x.section)} · ${esc(x.key)}</small></div><div>${editor}</div><button class="btn" data-save-content="${esc(x.key)}">حفظ</button></div>`;
+  }).join("")||'<div class="empty">لا يوجد محتوى</div>';
+  $("[data-save-content]").forEach(b=>b.onclick=()=>saveContent(b.dataset.saveContent));
+  $("[data-pick-content-image]").forEach(b=>b.onclick=()=>{
+    const key=b.dataset.pickContentImage,file=$(`[data-content-file="${CSS.escape(key)}"]`);
+    file.onchange=()=>{if(file.files[0])uploadContentImage(key,file.files[0])};file.click();
+  });
 }
 $("#contentSectionFilter").onchange=renderContent;
 async function saveContent(key){
-  const input=$(`[data-content-input="${CSS.escape(key)}"]`);const {error}=await sb.from("cms_content").update({value:input.value,updated_by:profile.user_id}).eq("key",key);if(error)toast(error.message);else{toast("تم حفظ المحتوى");const x=contentCache.find(x=>x.key===key);if(x)x.value=input.value}
+  const input=$(`[data-content-input="${CSS.escape(key)}"]`);const {error}=await sb.from("cms_content").update({value:input.value,updated_by:profile.user_id}).eq("key",key);if(error)toast(error.message);else{toast("تم حفظ المحتوى");const x=contentCache.find(x=>x.key===key);if(x)x.value=input.value;renderContent()}
+}
+async function uploadContentImage(key,file){
+  if(file.size>15*1024*1024){toast("الحد الأقصى 15MB");return}
+  const ext=(file.name.split(".").pop()||"jpg").toLowerCase(),path=`cms/${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}.${ext}`;
+  const {error:upErr}=await sb.storage.from("bunyah-site-media").upload(path,file,{contentType:file.type,upsert:false});if(upErr){toast(upErr.message);return}
+  const {data:urlData}=sb.storage.from("bunyah-site-media").getPublicUrl(path);
+  const public_url=urlData.publicUrl;
+  await sb.from("media_assets").insert({name:file.name,storage_path:path,public_url,alt_text:"",mime_type:file.type,size_bytes:file.size,created_by:profile.user_id});
+  const {error}=await sb.from("cms_content").update({value:public_url,updated_by:profile.user_id}).eq("key",key);
+  if(error){toast(error.message);return}
+  const x=contentCache.find(x=>x.key===key);if(x)x.value=public_url;toast("تم رفع الصورة واستبدالها");renderContent();
 }
 
 async function loadSettings(){
