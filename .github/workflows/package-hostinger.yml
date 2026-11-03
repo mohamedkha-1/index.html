@@ -1,0 +1,245 @@
+name: Build Hostinger Package
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current site
+        uses: actions/checkout@v4
+
+      - name: Build Hostinger-ready package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf hostinger-build bunyah-hostinger.zip
+          mkdir -p hostinger-build
+          cp -R assets hostinger-build/
+          cp -R bunyah-control hostinger-build/
+          cp index.html hostinger-build/site.html
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("hostinger-build/bunyah-control/index.html")
+          s = p.read_text(encoding="utf-8")
+          s = s.replace(
+              'const ADMIN_URL="https://mohamedkha-1.github.io/index.html/bunyah-control/";',
+              'const ADMIN_URL=new URL("./",location.href).href;'
+          )
+          s = s.replace(
+              'href="../" target="_blank"',
+              'href="../" target="_blank" rel="noopener"'
+          )
+          p.write_text(s, encoding="utf-8")
+          PY
+
+          cat > hostinger-build/index.php <<'PHP'
+          <?php
+          declare(strict_types=1);
+
+          const BUNYAH_SUPABASE_URL = 'https://zzcxqsaitkgjlwtowsih.supabase.co';
+          const BUNYAH_SUPABASE_KEY = 'sb_publishable_p-6AleErfPt8you1wp5vKA_amxtI9pb';
+
+          function bunyah_base_url(): string {
+              $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                  || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+              $scheme = $https ? 'https' : 'http';
+              $host = preg_replace('/[^a-zA-Z0-9.\-:\[\]]/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
+              $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '/index.php');
+              $dir = rtrim(dirname($script), '/.');
+              return $scheme . '://' . $host . ($dir ? $dir : '') . '/';
+          }
+
+          function bunyah_public_settings(): array {
+              $url = BUNYAH_SUPABASE_URL . '/rest/v1/cms_settings?select=key,value&is_public=eq.true';
+              $headers = [
+                  'apikey: ' . BUNYAH_SUPABASE_KEY,
+                  'Authorization: Bearer ' . BUNYAH_SUPABASE_KEY,
+                  'Accept: application/json',
+              ];
+              $body = false;
+
+              if (function_exists('curl_init')) {
+                  $ch = curl_init($url);
+                  curl_setopt_array($ch, [
+                      CURLOPT_RETURNTRANSFER => true,
+                      CURLOPT_CONNECTTIMEOUT => 2,
+                      CURLOPT_TIMEOUT => 4,
+                      CURLOPT_HTTPHEADER => $headers,
+                      CURLOPT_SSL_VERIFYPEER => true,
+                  ]);
+                  $body = curl_exec($ch);
+                  curl_close($ch);
+              } else {
+                  $ctx = stream_context_create(['http' => [
+                      'method' => 'GET',
+                      'timeout' => 4,
+                      'header' => implode("\r\n", $headers),
+                  ]]);
+                  $body = @file_get_contents($url, false, $ctx);
+              }
+
+              if (!$body) return [];
+              $rows = json_decode($body, true);
+              if (!is_array($rows)) return [];
+              $out = [];
+              foreach ($rows as $row) {
+                  if (isset($row['key'])) $out[(string)$row['key']] = (string)($row['value'] ?? '');
+              }
+              return $out;
+          }
+
+          function bunyah_attr(string $value): string {
+              return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+          }
+
+          $siteFile = __DIR__ . '/site.html';
+          if (!is_file($siteFile)) {
+              http_response_code(500);
+              exit('Bunyah site file is missing.');
+          }
+
+          $html = file_get_contents($siteFile);
+          $settings = bunyah_public_settings();
+          $base = bunyah_base_url();
+
+          $title = trim($settings['seo_title'] ?? '') ?: 'بُنية | تنفيذ المشاريع من المخطط إلى التشغيل في الرياض';
+          $description = trim($settings['seo_description'] ?? '');
+          $keywords = trim($settings['seo_keywords'] ?? '');
+          $robots = trim($settings['robots_content'] ?? '') ?: 'index,follow';
+          $canonical = trim($settings['seo_canonical'] ?? '');
+          if (!$canonical || str_contains($canonical, 'github.io')) $canonical = $base;
+          $googleVerify = trim($settings['google_site_verification'] ?? '');
+          $bingVerify = trim($settings['bing_site_verification'] ?? '');
+
+          $html = preg_replace('/<title>.*?<\/title>/is', '<title>' . bunyah_attr($title) . '</title>', $html, 1);
+
+          $meta = [
+              'description' => $description,
+              'keywords' => $keywords,
+              'robots' => $robots,
+              'google-site-verification' => $googleVerify,
+              'msvalidate.01' => $bingVerify,
+          ];
+
+          foreach ($meta as $name => $value) {
+              $pattern = '/<meta(?=[^>]*\bname=["\']' . preg_quote($name, '/') . '["\'])[^>]*>/i';
+              $tag = $value !== '' ? '<meta name="' . bunyah_attr($name) . '" content="' . bunyah_attr($value) . '"/>' : '';
+              if (preg_match($pattern, $html)) {
+                  $html = preg_replace($pattern, $tag, $html, 1);
+              } elseif ($tag !== '') {
+                  $html = preg_replace('/<\/head>/i', $tag . '</head>', $html, 1);
+              }
+          }
+
+          $canonicalTag = '<link rel="canonical" href="' . bunyah_attr($canonical) . '"/>';
+          if (preg_match('/<link(?=[^>]*\brel=["\']canonical["\'])[^>]*>/i', $html)) {
+              $html = preg_replace('/<link(?=[^>]*\brel=["\']canonical["\'])[^>]*>/i', $canonicalTag, $html, 1);
+          } else {
+              $html = preg_replace('/<\/head>/i', $canonicalTag . '</head>', $html, 1);
+          }
+
+          header('Content-Type: text/html; charset=UTF-8');
+          header('X-Content-Type-Options: nosniff');
+          header('Referrer-Policy: strict-origin-when-cross-origin');
+          echo $html;
+          PHP
+
+          cat > hostinger-build/robots.php <<'PHP'
+          <?php
+          declare(strict_types=1);
+          $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+              || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+          $scheme = $https ? 'https' : 'http';
+          $host = preg_replace('/[^a-zA-Z0-9.\-:\[\]]/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
+          $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '/robots.php');
+          $dir = rtrim(dirname($script), '/.');
+          $base = $scheme . '://' . $host . ($dir ? $dir : '') . '/';
+          header('Content-Type: text/plain; charset=UTF-8');
+          echo "User-agent: *\n";
+          echo "Allow: /\n";
+          echo "Disallow: /bunyah-control/\n\n";
+          echo "Sitemap: " . $base . "sitemap.xml\n";
+          PHP
+
+          cat > hostinger-build/sitemap.php <<'PHP'
+          <?php
+          declare(strict_types=1);
+          $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+              || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+          $scheme = $https ? 'https' : 'http';
+          $host = preg_replace('/[^a-zA-Z0-9.\-:\[\]]/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
+          $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '/sitemap.php');
+          $dir = rtrim(dirname($script), '/.');
+          $base = $scheme . '://' . $host . ($dir ? $dir : '') . '/';
+          header('Content-Type: application/xml; charset=UTF-8');
+          echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+          echo '  <url><loc>' . htmlspecialchars($base, ENT_XML1, 'UTF-8') . '</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>' . "\n";
+          echo '</urlset>' . "\n";
+          PHP
+
+          cat > hostinger-build/.htaccess <<'HT'
+          Options -Indexes
+          DirectoryIndex index.php
+
+          RewriteEngine On
+          RewriteRule ^robots\.txt$ robots.php [L]
+          RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+          <IfModule mod_headers.c>
+            Header always set X-Content-Type-Options "nosniff"
+            Header always set Referrer-Policy "strict-origin-when-cross-origin"
+            Header always set X-Frame-Options "SAMEORIGIN"
+            Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+          </IfModule>
+
+          <IfModule mod_expires.c>
+            ExpiresActive On
+            ExpiresByType image/jpeg "access plus 30 days"
+            ExpiresByType image/png "access plus 30 days"
+            ExpiresByType image/webp "access plus 30 days"
+            ExpiresByType text/css "access plus 7 days"
+            ExpiresByType application/javascript "access plus 1 day"
+          </IfModule>
+
+          <FilesMatch "^\.(env|git|htaccess)">
+            Require all denied
+          </FilesMatch>
+          HT
+
+          cat > hostinger-build/README_HOSTINGER.txt <<'TXT'
+          BUNYAH — HOSTINGER PACKAGE
+
+          1) ارفع جميع محتويات هذه الحزمة مباشرة داخل public_html.
+          2) تأكد أن PHP 8.0 أو أحدث مفعّل.
+          3) افتح الصفحة الرئيسية للتأكد من ظهور الموقع.
+          4) لوحة الإدارة: /bunyah-control/
+          5) الـ CMS والطلبات والصور مرتبطة بمشروع Supabase الحالي.
+          6) index.php يقرأ SEO العام من Supabase ويستخدم نطاق الاستضافة تلقائياً للـ canonical.
+          7) robots.txt و sitemap.xml يتم توليدهما تلقائياً على نطاق الاستضافة.
+          8) بعد تثبيت الدومين النهائي، حدّث "رابط الموقع" و"Canonical URL" من لوحة الإدارة.
+          9) لا ترفع مجلد .github ولا تحتاج GitHub Pages بعد النقل.
+          TXT
+
+          cd hostinger-build
+          zip -qr ../bunyah-hostinger.zip .
+          cd ..
+
+          test -f bunyah-hostinger.zip
+          unzip -l bunyah-hostinger.zip | head -80
+
+      - name: Upload Hostinger ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: bunyah-hostinger-package
+          path: bunyah-hostinger.zip
+          if-no-files-found: error
+          retention-days: 7
