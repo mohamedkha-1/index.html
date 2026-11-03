@@ -47,7 +47,7 @@ function applySettings(rows){
   const s=Object.fromEntries((rows||[]).map(x=>[x.key,x.value]));
   if(s.seo_title)document.title=s.seo_title;
   setMeta("description",s.seo_description);setMeta("keywords",s.seo_keywords);setMeta("robots",s.robots_content||"index,follow");
-  setCanonical(s.seo_canonical);
+  const canonical=(s.seo_canonical&&!String(s.seo_canonical).includes("github.io"))?s.seo_canonical:(location.origin+location.pathname);\n  setCanonical(canonical);
   setMeta("google-site-verification",s.google_site_verification);
   setMeta("msvalidate.01",s.bing_site_verification);
 
